@@ -230,8 +230,8 @@ void PhysicsEngine::NarrowPhaseCollisions()
 			{
 				if (m_DebugDrawFlags & DEBUHDRAW_FLAGS_COLLISIONNORMALS)
 				{
-					NCLDebug::DrawPoint(coldata.pointOnPlane, 0.1f, Vector4(0.5f, 0.5f, 1.0f, 1.0f));
-					NCLDebug::DrawThickLine(coldata.pointOnPlane, coldata.pointOnPlane - coldata.normal * coldata.penetration, 0.05f, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+					NCLDebug::DrawPointNDT(coldata.pointOnPlane, 0.1f, Vector4(0.5f, 0.5f, 1.0f, 1.0f));
+					NCLDebug::DrawThickLineNDT(coldata.pointOnPlane, coldata.pointOnPlane - coldata.normal * coldata.penetration, 0.05f, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
 				}
 
 				bool okA = cp.objectA->m_OnCollisionCallback(cp.objectB);

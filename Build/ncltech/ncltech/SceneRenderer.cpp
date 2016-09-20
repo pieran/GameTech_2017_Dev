@@ -194,6 +194,7 @@ void SceneRenderer::RenderScene()
 	glEnable(GL_STENCIL_TEST);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_BLEND);
+	glEnable(GL_FRAMEBUFFER_SRGB);
 	glDepthFunc(GL_LEQUAL);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -399,7 +400,6 @@ void SceneRenderer::BuildFBOs()
 		//Generate our Framebuffer
 		if (!m_ScreenFBO) glGenFramebuffers(1, &m_ScreenFBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, m_ScreenFBO);
-		glEnable(GL_FRAMEBUFFER_SRGB);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_ScreenTex[SCREENTEX_DEPTH], 0);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, m_ScreenTex[SCREENTEX_DEPTH], 0);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_ScreenTex[SCREENTEX_COLOUR0], 0);

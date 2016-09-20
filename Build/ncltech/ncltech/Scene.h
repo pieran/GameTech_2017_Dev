@@ -1,17 +1,23 @@
 /******************************************************************************
 Class: Scene
-Implements: OGLRenderer
-Author:Pieran Marris <p.marris@newcastle.ac.uk>, Rich Davison <richard.davison4@newcastle.ac.uk> and YOU!
-Description: For this module, you are being provided with a basic working
-Renderer - to give you more time to work on your physics and AI!
+Implements: 
+Author:Pieran Marris <p.marris@newcastle.ac.uk>
+Description: The Scene class is an extrapolation of the Scene Management tutorial 
+from Graphics for Games module. It contains a SceneTree of Objects which are automatically
+Culled, Rendered and Updated as needed during runtime.
 
-It is basically the Renderer from the Graphics For Games Module as it was
-by Tutorial 7 - Scene Management. It will split nodes up into those that are
-opaque and transparent, and render accordingly.
+With the addition of the SceneManager class, multiple scenes can cohexist within the same
+program meaning the same Scene could be initialied/cleaned up multiple times. The standard procedure
+for a Scene lifespan follows:-
+	1. Constructor()		 [Program Start]
+	2. OnInitializeScene()	 [Scene Focus]
+	3. OnCleanupScene()		 [Scene Lose Focus]
+	4. Deconsructor()		 [Program End]
 
-The only new bits are the ability to search for Game Object's by their name,
-this is not a fast function but does allow some ability to talk between objects in a more
-complicated scene.
+Once an object is added to the scene via AddGameObject(), the object is managed by the Scene. 
+This means that it will automatically call delete on any objects you have added when the scene 
+becomes innactive (lose focus). To override this you will need to override the OnCleanupScene method
+and handle cleanup of Objects yourself.
 
 
 		(\_/)								-_-_-_-_-_-_-_,------,
@@ -48,14 +54,17 @@ public:
 	void AddGameObject(Object* game_object);
 	Object* FindGameObject(const std::string& name);
 
+	const std::string& GetSceneName() { return m_SceneName; }
+
 	//Sets maximum bounds of the scene - for use in shadowing
 	void  SetWorldRadius(float radius)	{ m_RootGameObject->SetBoundingRadius(radius); }
+
+
 	float GetWorldRadius()				{ return m_RootGameObject->GetBoundingRadius(); }
 
 	void BuildWorldMatrices();
 	void InsertToRenderList(RenderList* list, const Frustum& frustum);
 
-	const std::string& GetSceneName() { return m_SceneName; }
 
 protected:
 

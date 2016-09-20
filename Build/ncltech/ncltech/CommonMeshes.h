@@ -2,10 +2,14 @@
 Class: CommonMeshes
 Implements:
 Author: Pieran Marris <p.marris@newcastle.ac.uk>
-Description: A quick and dirty library of common meshes, to save loading the same meshes over and over again.
+Description: 
+A quick and dirty library of common meshes, to save loading the same common meshes over and over again.
 
 These are loaded when the scene is first initialised and released when it is deleted, so will 
-be availible for the entirity of the program. Saves loading multiple copies of Cube/Sphere etc when starting the program.
+be globally availible for the entirity of the program. 
+
+If they are being used within an ObjectMesh instance, remember to set the 'deleteOnCleanup' flag to 
+false in order to prevent them being deleted when the ObjectMesh instance is deleted.
 
 
 		(\_/)
@@ -23,7 +27,7 @@ class Scene;
 
 class CommonMeshes
 {
-	friend class SceneRenderer; //Initializes/Destroys the given meshes with it's own lifecycle
+	friend class SceneRenderer; //Initializes/Destroys the given meshes within it's own lifecycle
 
 public:
 

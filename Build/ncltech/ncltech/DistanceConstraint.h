@@ -75,8 +75,8 @@ public:
 		Vector3 globalOnB = objB->GetOrientation().ToMatrix3() * localOnB + objB->GetPosition();
 
 		NCLDebug::DrawThickLine(globalOnA, globalOnB, 0.02f, Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-		NCLDebug::DrawPoint(globalOnA, 0.05f, Vector4(1.0f, 0.8f, 1.0f, 1.0f));
-		NCLDebug::DrawPoint(globalOnB, 0.05f, Vector4(1.0f, 0.8f, 1.0f, 1.0f));
+		NCLDebug::DrawPointNDT(globalOnA, 0.05f, Vector4(1.0f, 0.8f, 1.0f, 1.0f));
+		NCLDebug::DrawPointNDT(globalOnB, 0.05f, Vector4(1.0f, 0.8f, 1.0f, 1.0f));
 	}
 
 protected:
