@@ -16,8 +16,8 @@ texture coordinates back into world space.
 
 !!WARNING!!!
 If you've reached this comment because you are stumbling through the headers trying desperately
-to find out why the engine is so slow and the "Scene Updates" are taking 3ms+ for an empty 
-scene... LOOK NO FURTHER!
+to find out why the engine is so slow and the "Scene Updates" are taking 3ms+ for a simple scene 
+scene and 0ms when clicking an object... LOOK NO FURTHER!
 
 The method of reading pixels back from the graphics card is 'very' slow, as it requires the entire
 rendering pipeline to stall while pixels are read back to the cpu. There is ways this can be optimized
