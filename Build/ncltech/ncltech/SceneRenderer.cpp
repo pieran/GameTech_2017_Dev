@@ -39,7 +39,7 @@ SceneRenderer::SceneRenderer()
 	}
 
 	//Initialize the shadow render lists
-	for (int i = 0; i < m_ShadowMapNum; ++i)
+	for (uint i = 0; i < m_ShadowMapNum; ++i)
 	{
 		if (!RenderList::AllocateNewRenderList(&m_ShadowRenderLists[i], true))
 		{
@@ -56,7 +56,7 @@ SceneRenderer::~SceneRenderer()
 		glDeleteFramebuffers(1, &m_ShadowFBO);
 		m_ShadowTex[0] = NULL;
 
-		for (int i = 0; i < m_ShadowMapNum; ++i)
+		for (uint i = 0; i < m_ShadowMapNum; ++i)
 			delete m_ShadowRenderLists[i];
 	}
 
@@ -118,6 +118,7 @@ bool SceneRenderer::InitialiseGL()
 		return false;
 
 	init = true;
+	return true;
 }
 
 void SceneRenderer::InitializeDefaults()
@@ -334,7 +335,7 @@ void SceneRenderer::RenderShadowMaps()
 		glViewport(0, 0, m_ShadowMapSize, m_ShadowMapSize);
 		SetCurrentShader(m_ShaderColNorm);
 		Matrix4 identity = Matrix4();
-		for (int i = 0; i < m_ShadowMapNum; ++i)
+		for (uint i = 0; i < m_ShadowMapNum; ++i)
 		{
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_ShadowTex[i], 0);		
 			glClear(GL_DEPTH_BUFFER_BIT);
@@ -420,7 +421,7 @@ void SceneRenderer::BuildFBOs()
 	{	
 		m_ShadowMapsInvalidated = false;
 
-		for (int i = 0; i < m_ShadowMapNum; ++i)
+		for (uint i = 0; i < m_ShadowMapNum; ++i)
 		{
 			if (!m_ShadowTex[i]) glGenTextures(1, &m_ShadowTex[i]);
 			build_texture(m_ShadowTex[i], GL_DEPTH_COMPONENT32, m_ShadowMapSize, m_ShadowMapSize, true, true);
@@ -496,6 +497,8 @@ bool SceneRenderer::ShadersLoad()
 		SHADERERROR("Forward Renderer");
 		return false;
 	}
+
+	return true;
 }
 
 void SceneRenderer::ShadersSetDefaults()
@@ -593,7 +596,7 @@ void SceneRenderer::DeferredRenderOpaqueObjects()
 	glActiveTexture(GL_TEXTURE6); glBindTexture(GL_TEXTURE_2D, m_ScreenTex[SCREENTEX_COLOUR0]);
 	glActiveTexture(GL_TEXTURE7); glBindTexture(GL_TEXTURE_2D, m_ScreenTex[SCREENTEX_COLOUR1]);
 
-	for (int i = 0; i < m_ShadowMapNum; ++i)
+	for (uint i = 0; i < m_ShadowMapNum; ++i)
 	{
 		glActiveTexture(GL_TEXTURE8 + i);
 		glBindTexture(GL_TEXTURE_2D, m_ShadowTex[i]);
@@ -626,7 +629,7 @@ void SceneRenderer::ForwardRenderTransparentObjects()
 	glActiveTexture(GL_TEXTURE6); glBindTexture(GL_TEXTURE_2D, m_ScreenTex[SCREENTEX_COLOUR0]);
 	glActiveTexture(GL_TEXTURE7); glBindTexture(GL_TEXTURE_2D, m_ScreenTex[SCREENTEX_COLOUR1]);
 
-	for (int i = 0; i < m_ShadowMapNum; ++i)
+	for (uint i = 0; i < m_ShadowMapNum; ++i)
 	{
 		glActiveTexture(GL_TEXTURE8 + i);
 		glBindTexture(GL_TEXTURE_2D, m_ShadowTex[i]);

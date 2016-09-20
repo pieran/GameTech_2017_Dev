@@ -72,7 +72,7 @@ void PrintStatusEntries()
 	NCLDebug::AddStatusEntry(status_colour_header, "[%d/%d]: %s (Press T/Y to cycle or R to reload)",
 		SceneManager::Instance()->GetCurrentSceneIndex() + 1,
 		SceneManager::Instance()->SceneCount(),
-		SceneManager::Instance()->GetCurrentScene()->GetSceneName()
+		SceneManager::Instance()->GetCurrentScene()->GetSceneName().c_str()
 		);
 
 	//Print Performance Timers

@@ -37,6 +37,8 @@ void SceneManager::EnqueueScene(Scene* scene)
 	//If this was the first scene, activate it immediately
 	if (m_AllScenes.size() == 1)
 		JumpToScene(0);
+	else
+		Window::GetWindow().SetWindowTitle("NCLTech - [%d/%d] %s", m_SceneIdx + 1, m_AllScenes.size(), m_Scene->GetSceneName().c_str());
 }
 
 void SceneManager::JumpToScene()
@@ -59,7 +61,7 @@ void SceneManager::JumpToScene(int idx)
 
 		m_FrameRenderList->RemoveAllObjects();
 
-		for (int i = 0; i < m_ShadowMapNum; ++i)
+		for (uint i = 0; i < m_ShadowMapNum; ++i)
 			m_ShadowRenderLists[i]->RemoveAllObjects();
 
 		m_Scene->OnCleanupScene();
@@ -72,7 +74,7 @@ void SceneManager::JumpToScene(int idx)
 	PhysicsEngine::Instance()->SetDefaults();
 	InitializeDefaults();
 	m_Scene->OnInitializeScene();
-	Window::GetWindow().SetWindowTitle("NCLTech - [%d/%d] %s", idx + 1, m_AllScenes.size(), m_Scene->GetSceneName());
+	Window::GetWindow().SetWindowTitle("NCLTech - [%d/%d] %s", idx + 1, m_AllScenes.size(), m_Scene->GetSceneName().c_str());
 }
 
 void SceneManager::JumpToScene(const std::string& friendly_name)

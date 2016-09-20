@@ -173,7 +173,8 @@ bool	OBJMesh::LoadOBJMesh(std::string filename)	{
 			}
 		}
 		else{
-			std::cout << "OBJMesh::LoadOBJMesh Unknown file data:" << currentLine << std::endl;
+			//No comments!
+			//std::cout << "OBJMesh::LoadOBJMesh Unknown file data:" << currentLine << std::endl;
 		}
 	}
 

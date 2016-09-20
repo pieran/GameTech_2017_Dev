@@ -39,7 +39,7 @@ public:
 
 		//Create Seats
 		uint numSeats = 10;
-		for (int i = 0; i < numSeats; ++i)
+		for (uint i = 0; i < numSeats; ++i)
 		{
 			float angleX = cos(i / (float)numSeats * PI * 2.0f);
 			float angleY = sin(i / (float)numSeats * PI * 2.0f);
