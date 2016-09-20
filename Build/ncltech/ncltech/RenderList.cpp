@@ -73,8 +73,10 @@ void RenderList::UpdateCameraWorldPos(const Vector3& cameraPos)
 		}
 	};
 
+#if SORT_OPAQUE_LIST
 	update_list(m_RenderListOpaque, 1.0f);
-	
+#endif
+
 	if (m_SupportsTransparancy)
 		update_list(m_RenderListTransparent, -1.0f);
 }
@@ -101,7 +103,9 @@ void RenderList::SortLists()
 		}
 	};
 
+#if SORT_OPAQUE_LIST
 	sort_list(m_RenderListOpaque);
+#endif
 
 	if (m_SupportsTransparancy)
 		sort_list(m_RenderListTransparent);
@@ -167,31 +171,46 @@ void RenderList::InsertObject(Object* obj)
 	m_NumElementsChanged++;
 	obj->m_FrustumCullFlags |= m_BitMask;
 
-	RenderList_Object carry_obj;
-	carry_obj.target_obj = obj;
-	carry_obj.cam_dist_sq = (obj->m_WorldTransform.GetPositionVector() - m_CameraPos).LengthSquared();
+
 	auto target_list = &m_RenderListOpaque;
 
+	RenderList_Object carry_obj;
+	carry_obj.target_obj = obj;
+		
+#if !SORT_OPAQUE_LIST
 	if (!isOpaque)
 	{
-		//If the object is transparent, add it to the transparent render list
-		target_list = &m_RenderListTransparent;
-		
-		//To cheat the sorting system to always use the same sorting opperand, we just invert all transparent distances so negative far is less than neg near.
-		carry_obj.cam_dist_sq = -carry_obj.cam_dist_sq;
-	}
-	
-	//Find where the object should be inserted
-	auto loc = target_list->end();
-	for (auto itr = target_list->begin(); itr != target_list->end(); itr++)
-	{
-		if (itr->cam_dist_sq > carry_obj.cam_dist_sq)
+#endif		
+		carry_obj.cam_dist_sq = (obj->m_WorldTransform.GetPositionVector() - m_CameraPos).LengthSquared();
+
+		if (!isOpaque)
 		{
-			loc = itr;
-			break;
+			//If the object is transparent, add it to the transparent render list
+			target_list = &m_RenderListTransparent;
+
+			//To cheat the sorting system to always use the same sorting opperand, we just invert all transparent distances so negative far is less than neg near.
+			carry_obj.cam_dist_sq = -carry_obj.cam_dist_sq;
 		}
+
+		//Find where the object should be inserted
+		auto loc = target_list->end();
+		for (auto itr = target_list->begin(); itr != target_list->end(); itr++)
+		{
+			if (itr->cam_dist_sq > carry_obj.cam_dist_sq)
+			{
+				loc = itr;
+				break;
+			}
+		}
+		target_list->insert(loc, carry_obj);
+
+#if !SORT_OPAQUE_LIST
 	}
-	target_list->insert(loc, carry_obj);
+	else
+	{
+		m_RenderListOpaque.push_back(carry_obj);
+	}
+#endif
 }
 
 void RenderList::RemoveObject(Object* obj)

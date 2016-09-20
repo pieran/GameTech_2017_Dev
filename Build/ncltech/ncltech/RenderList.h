@@ -8,6 +8,7 @@
 
 //Maximum number of elements added to the renderlist per frame (will be added on future frames instead to share workload and prevent lock-ups)
 #define MAX_LIST_CHANGE_PER_FRAME 300
+#define SORT_OPAQUE_LIST FALSE //Sort opaque objects front to back to reduce over drawing - tie up between slow sorting or slow rendering, in the current usage the sorting is almost always the bottlekneck. (Transparent objects always need to be sorted in order to correctly draw)
 
 struct RenderList_Object
 {
