@@ -1,7 +1,7 @@
 #include "SphereCollisionShape.h"
 #include "PhysicsObject.h"
+#include "NCLDebug.h"
 #include <nclgl/Matrix3.h>
-#include <ncltech\NCLDebug.h>
 
 SphereCollisionShape::SphereCollisionShape()
 {

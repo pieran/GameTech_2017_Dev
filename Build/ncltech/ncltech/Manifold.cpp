@@ -1,6 +1,6 @@
 #include "Manifold.h"
 #include <nclgl\Matrix3.h>
-#include <ncltech\NCLDebug.h>
+#include "NCLDebug.h"
 #include "PhysicsEngine.h"
 
 #define persistentThresholdSq 0.025f

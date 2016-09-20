@@ -2,7 +2,6 @@
 #include <nclgl\GameTimer.h>
 #include <ncltech\NCLDebug.h>
 
-
 class PerfTimer
 {
 public:

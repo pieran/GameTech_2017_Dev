@@ -1,5 +1,5 @@
 #include "Hull.h"
-#include <ncltech\NCLDebug.h>
+#include "NCLDebug.h"
 
 Hull::Hull()
 {

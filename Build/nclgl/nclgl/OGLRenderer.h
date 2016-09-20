@@ -19,10 +19,10 @@ _-_-_-_-_-_-_-""  ""
 #include <fstream>
 #include <vector>
 
-#include "GL/glew.h"
-#include "GL/wglew.h"
+#include <GL/glew.h>
+#include <GL/wglew.h>
 
-#include "SOIL.h"
+#include <SOIL.h>
 
 #include "Vector4.h"
 #include "Vector3.h"
