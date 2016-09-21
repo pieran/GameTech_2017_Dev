@@ -7,14 +7,14 @@ in Vertex	{
 	vec2 texCoords;
 } IN;
 
-out vec4 gl_FragColor;
+out vec4 OutFrag;
 
 void main(void)	{
-	gl_FragColor = texture(fontTex, IN.texCoords) * IN.colour;
+	OutFrag = texture(fontTex, IN.texCoords) * IN.colour;
 	
-	if (gl_FragColor.w < 0.1f)
+	if (OutFrag.w < 0.1f)
 	{
 		discard;
 	}
-	//gl_FragColor.w = 1.0f;
+	//OutFrag.w = 1.0f;
 }
