@@ -37,9 +37,9 @@ Matrix3 CuboidCollisionShape::BuildInverseInertia(float invMass) const
 	Vector3 dimsSq = (m_CuboidHalfDimensions + m_CuboidHalfDimensions);
 	dimsSq = dimsSq * dimsSq;
 
-	inertia._11 = 12.f * invMass * 1.f / (dimsSq.y + dimsSq.z);
-	inertia._22 = 12.f * invMass * 1.f / (dimsSq.x + dimsSq.z);
-	inertia._33 = 12.f * invMass * 1.f / (dimsSq.x + dimsSq.y);
+	inertia._11 = 12.f * invMass / (dimsSq.y + dimsSq.z);
+	inertia._22 = 12.f * invMass / (dimsSq.x + dimsSq.z);
+	inertia._33 = 12.f * invMass / (dimsSq.x + dimsSq.y);
 	
 	return inertia;
 }
