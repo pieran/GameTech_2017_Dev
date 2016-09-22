@@ -30,14 +30,30 @@ class SceneManager : public SceneRenderer, public TSingleton<SceneManager>
 	friend class TSingleton < SceneManager >;
 
 public:
+	// Add Scene to list of possible scenes to switch to
 	void EnqueueScene(Scene* scene);
 
-	void JumpToScene(); //Jumps to next scene (or reloads current scene if it's the only one)
-	void JumpToScene(int idx);									//Scenes stored in array format, first-0, second-1 etc..
+
+
+	//Jump to the next scene in the list or first scene if at the end
+	void JumpToScene();
+
+	//Jump to scene index (stored in order they were originally added starting at zero)
+	void JumpToScene(int idx);
+
+	//Jump to scene name
 	void JumpToScene(const std::string& friendly_name);
 
+
+
+
+	//Get currently active scene (returns NULL if no scenes yet added)
 	inline Scene* GetCurrentScene()			{ return m_Scene; }
+
+	//Get currently active scene's index (return 0 if no scenes yet added)
 	inline uint   GetCurrentSceneIndex()	{ return m_SceneIdx; }
+
+	//Get total number of enqueued scenes
 	inline uint   SceneCount()				{ return m_AllScenes.size(); }
 
 
@@ -46,7 +62,6 @@ protected:
 	virtual ~SceneManager();
 
 protected:
-
 	uint				m_SceneIdx;
-	std::vector<Scene*> m_AllScenes;	//List of all scenes available to swap between
+	std::vector<Scene*> m_AllScenes;
 };

@@ -2,20 +2,23 @@
 Class:GameObject
 Implements:
 Author: Rich Davison	<richard.davison4@newcastle.ac.uk> and YOU!
-Description: This is the base class for all of the objects in your game - the
+Description: 
+
+This is the base class for all of the objects in your game - the
 player character, enemies, pickups etc would all be derived classes of the
 GameObject.
 
 This class 'wraps up' all of the communication between the subsystems of your
-game - it has a renderer component (The SceneNode you are used to using), a
-'physics' component (The PhysicsNode you've been introduced to in this code
-download), and eventually you'll add a 'sound' component, in the short sound
-workshop in semester 2.
+game - it has a renderer component (Similar to the SceneNode you are used to
+using), an optional 'physics' component (The PhysicsNode you've been introduced
+to in this code download), and eventually you'll add a 'sound' component, in the
+short sound workshop in semester 2.
 
 The sub systems handle the updating of the 'sub components' of a GameEntity,
 so in the Update function of this class will just be the 'gameplay' specific
 type functionality (has the player picked up some health / has he shot an enemy
 and so forth).
+
 
 -_-_-_-_-_-_-_,------,
 _-_-_-_-_-_-_-|   /\_/\   NYANYANYAN
@@ -47,20 +50,31 @@ public:
 	virtual ~Object();
 
 
-
+//<------- PHYSICS ----------->
+	//This function creates a new physics node for the object in question.
+	// - MUST be called before setting any parameters with Physics()
 	void CreatePhysicsNode();
+
+	//Returns true if this object has a physicsObject attached
 	bool HasPhysics() { return (m_PhysicsObject != NULL); }
 
+	//Gets a pointer to this objects physicsObject (or NULL if none set)
 	PhysicsObject*		Physics() { return m_PhysicsObject; }
 
 
+//<------- SCENE TREE --------->
+	//Get a list of all child scene-tree objects
+	std::vector<Object*>& GetChildren()		{ return m_Children; }
+
+	//Recursively search this and all children for an object with the given name (returns NULL if none found)
+	Object*				FindGameObject(const std::string& name);
+
+
+	void				AddChildObject(Object* child);
+
 
 	const std::string&	GetName()			{ return m_Name; }
-	std::vector<Object*>& GetChildren()		{ return m_Children; }
-	
 
-	Object*				FindGameObject(const std::string& name);
-	void				AddChildObject(Object* child);
 
 	virtual bool IsOpaque() { return m_Colour.w >= 0.999f; }
 
@@ -85,7 +99,7 @@ protected:
 	virtual void OnRenderObject()				{};				//Handles OpenGL calls to Render the object
 	virtual void OnUpdateObject(float dt)		{};				//Override to handle things like AI etc on update loop
 
-	// Mouse Interactivity - To Enable the gameobject must call "ScreenPicker::Instance()->RegisterObject(this)"
+	// Mouse Interactivity - To Enable the object must call "ScreenPicker::Instance()->RegisterObject(this)"
 	virtual void OnMouseEnter(float dt)			{};
 	virtual void OnMouseLeave(float dt)			{};
 	virtual void OnMouseDown(float dt, const Vector3& worldPos)									{};

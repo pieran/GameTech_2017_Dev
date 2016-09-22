@@ -197,7 +197,7 @@ void NCLDebug::DrawPolygonNDT(int n_verts, const Vector3* verts, const Vector4& 
 
 
 
-void NCLDebug::DrawTextClipSpace(const Vector4& cs_pos, const float font_size, const string& text, const TextAlignment alignment, const Vector4 colour)
+void NCLDebug::DrawTextCs(const Vector4& cs_pos, const float font_size, const string& text, const TextAlignment alignment, const Vector4 colour)
 {
 	Vector2 screenSize = Window::GetWindow().GetScreenSize();
 	Vector3 cs_size = Vector3(font_size / screenSize.x, font_size / screenSize.y, 0.0f);
@@ -251,7 +251,7 @@ void NCLDebug::DrawTextWs(const Vector3& pos, const float font_size, const TextA
 	std::string formatted_text = std::string(buf, (size_t)length);
 
 	Vector4 cs_pos = m_ProjView * Vector4(pos.x, pos.y, pos.z, 1.0f);
-	DrawTextClipSpace(cs_pos, font_size, formatted_text, alignment, colour);
+	DrawTextCs(cs_pos, font_size, formatted_text, alignment, colour);
 }
 
 void NCLDebug::DrawTextWsNDT(const Vector3& pos, const float font_size, const TextAlignment alignment, const Vector4 colour, const string text, ...)
@@ -269,7 +269,7 @@ void NCLDebug::DrawTextWsNDT(const Vector3& pos, const float font_size, const Te
 
 	Vector4 cs_pos = m_ProjView * Vector4(pos.x, pos.y, pos.z, 1.0f);
 	cs_pos.z = 1.0f * cs_pos.w;
-	DrawTextClipSpace(cs_pos, font_size, formatted_text, alignment, colour);
+	DrawTextCs(cs_pos, font_size, formatted_text, alignment, colour);
 }
 
 
@@ -290,7 +290,7 @@ void NCLDebug::AddStatusEntry(const Vector4& colour, const std::string text, ...
 
 	std::string formatted_text = std::string(buf, (size_t)length);
 
-	DrawTextClipSpace(Vector4(-1.0f + cs_size_x * 0.5f, 1.0f - (m_NumStatusEntries * cs_size_y) - cs_size_y, -1.0f, 1.0f), STATUS_TEXT_SIZE, formatted_text, TEXTALIGN_LEFT, colour);
+	DrawTextCs(Vector4(-1.0f + cs_size_x * 0.5f, 1.0f - (m_NumStatusEntries * cs_size_y) - cs_size_y, -1.0f, 1.0f), STATUS_TEXT_SIZE, formatted_text, TEXTALIGN_LEFT, colour);
 	m_NumStatusEntries++;
 }
 
@@ -451,7 +451,7 @@ void NCLDebug::DrawDebugLists()
 		float alpha = ((m_LogEntries.size() - i) / (float(MAX_LOG_SIZE)));
 		alpha = 1.0f - (alpha * alpha);
 
-		DrawTextClipSpace(Vector4(-1.0f + cs_size_x * 0.5f, -1.0f + ((log_len - i - 1) * cs_size_y) + cs_size_y, 0.0f, 1.0f), LOG_TEXT_SIZE, m_LogEntries[idx].text, TEXTALIGN_LEFT, m_LogEntries[idx].colour);
+		DrawTextCs(Vector4(-1.0f + cs_size_x * 0.5f, -1.0f + ((log_len - i - 1) * cs_size_y) + cs_size_y, 0.0f, 1.0f), LOG_TEXT_SIZE, m_LogEntries[idx].text, TEXTALIGN_LEFT, m_LogEntries[idx].colour);
 	}
 
 

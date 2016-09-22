@@ -2,10 +2,59 @@
 Class: NCLDebug
 Author: Pieran Marris <p.marris@newcastle.ac.uk>
 Description:
-Provides a range of globally accessable debug utilities to allow visualising world space problems/algorithms easily.
 
-Note: Both 'point_radius' (DrawPoint) and 'line_width' (DrawThickLine) are in world-space coordinates
- while 'font_size' (All Text Functions) is in terms of screen pixels - the same as microsoft word etc.
+Combination of the debug tools available in OGLRenderer and some of the later graphics tutorials on
+text renderering and particles systems. NCLDebug is designed to be a quick and dirty way of rendering
+simple geometry on-screen anywhere in the program. 
+
+All functions are global, and can be called at any time any where in the program. All log entries are
+also printed out to the console in case of log messages/errors that occur before the renderer has initiated.
+
+
+Below is a list of functions supported by NCLDebug:
+	Note: All functions have an "<function>NDT" varient which refers to 'non depth-tested' meaning
+		  they will always renderered be on top of any other world geometry.
+
+	1. DrawPoint
+		Draws a circle on screen with the world-space radius provided
+
+	2. DrawThickLine
+		Draws a line between A and B in world space with a line-thickness t given in world-space
+
+	3. DrawHairLine
+		Draws a line between A and B in world space that will always be 1pixel thick, regardless of distance from the camera
+
+	4. DrawMatrix
+		Draws the X,Y,Z rotation axis of the given matrix at it's world-space position.
+		Colours go in order, X:Red - Y:Green - Z:Blue
+
+	5. DrawTriangle
+		Draws a triangle on screen, with the vertices given in world-space coordinates
+
+	6. DrawPolygon
+		Draws a given polygon on screen. Converts vertices into a triangle fan with vertex[0] being the fan centre.
+
+	7. DrawTextWs
+		Draws text with font-size 'f' (given in screen pixels) at the world space position provided.
+
+	8. DrawTextCs
+		Draws text with font-size 'f' (given in screen pixels) at the clip space position provided.
+
+	9. AddStatusEntry
+		Appends the list of status entries (top left display) with the given text. The text is formatted in 
+		accordance with C's printf function.
+		Note: These status entries are cleared each frame and must be re-added each render cycle
+
+	10. Log
+		Appends the list of log entries (bottom left display) with the given text. The text is formatted in
+		accordance with C's printf function. All log entries will also be prepended with the system time in
+		hh::mm::ss format.
+		Note: The Log entries are a call once and forget system, and will only be cleared once LOG_SIZE other log
+			  entries have also be fired and pushed it off the stack.
+
+	11. NCLERROR()
+		Util define to automatically add an error log entry. Using this define is preferable over just calling Log
+		function as it will include the filename and linenumber it was triggered on with the relevant .cpp file.
 
 
 		(\_/)
@@ -93,7 +142,7 @@ public:
 	static void DrawTextWsNDT(const Vector3& pos, const float font_size, const TextAlignment alignment, const Vector4 colour, const string text, ...); ///See "printf" for usuage manual
 
 	//Draw Text (pos is assumed to be pre-multiplied by projMtx * viewMtx at this point)
-	static void DrawTextClipSpace(const Vector4& pos, const float font_size, const string& text, const TextAlignment alignment = TEXTALIGN_LEFT, const Vector4 colour = Vector4(1.0f, 1.0f, 1.0f, 1.0f));
+	static void DrawTextCs(const Vector4& pos, const float font_size, const string& text, const TextAlignment alignment = TEXTALIGN_LEFT, const Vector4 colour = Vector4(1.0f, 1.0f, 1.0f, 1.0f));
 
 	//Add a status entry at the top left of the screen (Cleared each frame)
 	static void AddStatusEntry(const Vector4& colour, const std::string text, ...); ///See "printf" for usuage manual

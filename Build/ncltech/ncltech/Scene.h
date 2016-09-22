@@ -1,8 +1,10 @@
 /******************************************************************************
 Class: Scene
 Implements: 
-Author:Pieran Marris <p.marris@newcastle.ac.uk>
-Description: The Scene class is an extrapolation of the Scene Management tutorial 
+Author: Pieran Marris <p.marris@newcastle.ac.uk>
+Description: 
+
+The Scene class is an extrapolation of the Scene Management tutorial 
 from Graphics for Games module. It contains a SceneTree of Objects which are automatically
 Culled, Rendered and Updated as needed during runtime.
 
@@ -20,10 +22,10 @@ becomes innactive (lose focus). To override this you will need to override the O
 and handle cleanup of Objects yourself.
 
 
-		(\_/)								-_-_-_-_-_-_-_,------,
-		( '_')								_-_-_-_-_-_-_-|   /\_/\   NYANYANYAN
-	 /""""""""""""\=========     -----D		-_-_-_-_-_-_-~|__( ^ .^) /
-	/"""""""""""""""""""""""\				_-_-_-_-_-_-_-""  ""
+		(\_/)								
+		( '_')								
+	 /""""""""""""\=========     -----D		
+	/"""""""""""""""""""""""\			
 ....\_@____@____@____@____@_/
 
 *//////////////////////////////////////////////////////////////////////////////

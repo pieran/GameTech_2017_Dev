@@ -24,7 +24,6 @@ additional constraints of friction and also elasticity in the form of a bias ter
 #pragma once
 
 #include "PhysicsObject.h"
-#include <list>
 #include <nclgl\Vector3.h>
 
 /* A contact constraint is actually the summation of a normal distance constraint

@@ -16,15 +16,15 @@ texture coordinates back into world space.
 
 !!WARNING!!!
 If you've reached this comment because you are stumbling through the headers trying desperately
-to find out why the engine is so slow and the "Scene Updates" are taking 3ms+ for a simple scene 
-scene and 0ms when clicking an object... LOOK NO FURTHER!
+to find out why the engine is so slow and the "Scene Updates" are apparently taking 3ms+ for a
+simple scene and 0ms when clicking an object... THEN LOOK NO FURTHER!
 
 The method of reading pixels back from the graphics card is 'very' slow, as it requires the entire
 rendering pipeline to stall while pixels are read back to the cpu. There is ways this can be optimized
-by doing the reads asynchronously, however this wont aliaviate the big issue - the extra render pass and
-reading of pixels. As you progress through the physics module and hopefully implement a broadphase
-you will find doing a ray cast through the broadphase a much faster means of doing mouse-interactivity
-than screen picking and the way all game engines handle mouse-interactivity.
+by doing the reads asynchronously through the use of pixel buffers, however this wont aliaviate the big
+issue. As you progress through the physics module and hopefully implement a broadphase you will find
+doing a ray cast through the broadphase a much faster means of doing mouse-interactivity than screen
+picking and the way all game engines handle mouse-interactivity.
 
 
 		(\_/)
@@ -45,7 +45,7 @@ than screen picking and the way all game engines handle mouse-interactivity.
 #define MAX_PICKABLE_OBJECTS 65534
 
 //NSIGHT doesnt (at the time of writing) support reading GL_RED_INTEGER format. So this hack will treat all indicies as 32bit floats
-// that will be converted to integers again later. Not ideal - but worth it to allow nsight debugging ;)
+// that will be converted to integers again later. Not ideal - but worth it to allow nsight debugging as needed ;)
 #define USE_NSIGHT_HACK
 
 class ScreenPicker : public TSingleton<ScreenPicker>
@@ -55,7 +55,10 @@ class ScreenPicker : public TSingleton<ScreenPicker>
 
 public:
 
+	//Add object to list of 'clickable' objects to be tested 
 	void RegisterObject(Object* obj);
+
+	//Remove object from the list of 'clickable' objects
 	void UnregisterObject(Object* obj);
 
 protected:
@@ -65,31 +68,41 @@ protected:
 	void RenderPickingScene(RenderList* scene_renderlist, const Matrix4& proj_matrix, const Matrix4& view_matrix);
 
 	//ScreenRenderer Update Phase
-	bool HandleMouseClicks(float dt); //Returns true if an object has been clicked
+	//  - Returns true if an object has been clicked
+	bool HandleMouseClicks(float dt); 
 
-	//Pseodo Protected
-	ScreenPicker();
-	virtual ~ScreenPicker();
-
+	//Internal handling of different mouse state scenarios
 	void HandleObjectMouseUp(float dt, bool mouse_in_window, Vector3& clip_space);
 	void HandleObjectMouseMove(float dt, Vector3& clip_space);
 
 
+	//Pseodo Protected
+	ScreenPicker();
+	virtual ~ScreenPicker();
 protected:
 
-	Object*			m_CurrentlyHoverObject;
-	Object*			m_CurrentlyHeldObject;
-	float			m_OldDepth;
-	Vector3			m_OldWorldSpacePos;
-	Matrix4			m_invViewProjMtx;
-
+	//Array of all objects to be tested
 	std::vector<Object*> m_AllRegisteredObjects;
 
-	int m_TexWidth, m_TexHeight;
-	GLuint m_PickerFBO;
+	//Current State
+	Object*			m_CurrentlyHoverObject;
+	Object*			m_CurrentlyHeldObject;
 
+	//Cached data to allow world-space movement computation
+	float			m_OldDepth;
+	Vector3			m_OldWorldSpacePos;
+
+	//clip-space to world-space transform
+	Matrix4			m_invViewProjMtx;
+
+
+
+	//Shader
 	Shader* m_ShaderPicker;
 
+	//Framebuffer
+	int m_TexWidth, m_TexHeight;
+	GLuint m_PickerFBO;
 	//Must use renderbuffer outputing integer colour data to texture is not supported.
 	// This is exactly the same as texture output framebuffer except they are not in themselves valid textures
 	// so can only be read to and from using framebuffer commands like glReadPixels.
