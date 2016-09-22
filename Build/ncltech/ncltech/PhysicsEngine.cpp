@@ -12,7 +12,7 @@ void PhysicsEngine::SetDefaults()
 	m_UpdateTimestep = 1.0f / 60.f;
 	m_UpdateAccum = 0.0f;
 	m_Gravity = Vector3(0.0f, -9.81f, 0.0f);
-	m_DampingFactor = 0.9999f;
+	m_DampingFactor = 0.999f;
 }
 
 PhysicsEngine::PhysicsEngine()
@@ -263,17 +263,19 @@ void PhysicsEngine::SolveConstraints()
 		c->PreSolverStep(m_UpdateTimestep);
 	}
 	
-
+	float factor = 1.0f;
 	for (size_t i = 0; i < SOLVER_ITERATIONS; ++i)
 	{
 		for (Manifold* m : m_Manifolds)
 		{
-			m->ApplyImpulse();
+			m->ApplyImpulse(factor);
 		}
 
 		for (Constraint* c : m_Constraints)
 		{
 			c->ApplyImpulse();
 		}
+
+		factor *= 0.75f;
 	}
 }

@@ -25,10 +25,10 @@ public:
 		this->AddGameObject(Utils::BuildCuboidObject("Ground", Vector3(0.0f, -1.0f, 0.0f), Vector3(20.0f, 1.0f, 20.0f), 0.0f, true, false, Vector4(0.2f, 0.5f, 1.0f, 1.0f)));
 
 		//Create Pen Walls
-		this->AddGameObject(Utils::BuildCuboidObject("Wall1", Vector3(-2.85f, 0.05f, 0.0f), Vector3(0.5f, 0.05f, 3.35f), 0.0f, true, false, Vector4(1.0f, 0.5f, 1.0f, 1.0f)));
-		this->AddGameObject(Utils::BuildCuboidObject("Wall2", Vector3(2.85f, 0.05f, 0.0f), Vector3(0.5f, 0.05f, 3.35f), 0.0f, true, false, Vector4(1.0f, 0.5f, 1.0f, 1.0f)));
-		this->AddGameObject(Utils::BuildCuboidObject("Wall3", Vector3(0.0f, 0.05f, -2.85f), Vector3(2.35f, 0.05f, 0.5f), 0.0f, true, false, Vector4(1.0f, 0.5f, 1.0f, 1.0f)));
-		this->AddGameObject(Utils::BuildCuboidObject("Wall4", Vector3(0.0f, 0.05f, 2.85f), Vector3(2.35f, 0.05f, 0.5f), 0.0f, true, false, Vector4(1.0f, 0.5f, 1.0f, 1.0f)));
+		this->AddGameObject(Utils::BuildCuboidObject("Wall1", Vector3(-2.85f, 0.1f, 0.0f), Vector3(0.5f, 0.1f, 3.35f), 0.0f, true, false, Vector4(1.0f, 0.5f, 1.0f, 1.0f)));
+		this->AddGameObject(Utils::BuildCuboidObject("Wall2", Vector3(2.85f, 0.1f, 0.0f), Vector3(0.5f, 0.1f, 3.35f), 0.0f, true, false, Vector4(1.0f, 0.5f, 1.0f, 1.0f)));
+		this->AddGameObject(Utils::BuildCuboidObject("Wall3", Vector3(0.0f, 0.1f, -2.85f), Vector3(2.35f, 0.1f, 0.5f), 0.0f, true, false, Vector4(1.0f, 0.5f, 1.0f, 1.0f)));
+		this->AddGameObject(Utils::BuildCuboidObject("Wall4", Vector3(0.0f, 0.1f, 2.85f), Vector3(2.35f, 0.1f, 0.5f), 0.0f, true, false, Vector4(1.0f, 0.5f, 1.0f, 1.0f)));
 
 		//Create Sphere Triangle Stack
 		for (int y = 0; y < 5; ++y)
@@ -81,5 +81,29 @@ public:
 			);
 		PhysicsEngine::Instance()->AddConstraint(dc);
 		
+	}
+
+	virtual void OnUpdateScene(float dt) override
+	{
+		Scene::OnUpdateScene(dt);
+
+		uint drawFlags = PhysicsEngine::Instance()->GetDebugDrawFlags();
+
+		NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "Physics:");
+		NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "     Draw Collision Volumes : %s (Press C to toggle)", (drawFlags & DEBUHDRAW_FLAGS_COLLISIONVOLUMES) ? "Enabled" : "Disabled");
+		NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "     Draw Collision Normals : %s (Press N to toggle)", (drawFlags & DEBUHDRAW_FLAGS_COLLISIONNORMALS) ? "Enabled" : "Disabled");
+		NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "     Draw Manifolds : %s (Press M to toggle)", (drawFlags & DEBUHDRAW_FLAGS_MANIFOLD) ? "Enabled" : "Disabled");
+
+
+		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_C))
+			drawFlags ^= DEBUHDRAW_FLAGS_COLLISIONVOLUMES;
+
+		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_N))
+			drawFlags ^= DEBUHDRAW_FLAGS_COLLISIONNORMALS;
+
+		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_M))
+			drawFlags ^= DEBUHDRAW_FLAGS_MANIFOLD;
+
+		PhysicsEngine::Instance()->SetDebugDrawFlags(drawFlags);
 	}
 };
