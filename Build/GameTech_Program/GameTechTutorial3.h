@@ -116,7 +116,7 @@ public:
 			obj->CreatePhysicsNode();
 			obj->Physics()->SetPosition(Vector3(-5.0f, 2.f, -5.0f));
 			obj->Physics()->SetCollisionShape(new CuboidCollisionShape(col_size));
-			obj->Physics()->SetOnCollisionCallback([](PhysicsObject* collidingObject){
+			obj->Physics()->SetOnCollisionCallback([](PhysicsObject* self, PhysicsObject* collidingObject){
 				NCLDebug::Log(Vector3(0.6f, 0.3f, 0.1f), "You are inside the house!");
 				return false;
 			});
@@ -135,7 +135,7 @@ public:
 			obj->CreatePhysicsNode();
 			obj->Physics()->SetPosition(Vector3(5.0f, 0.5f, -5.0f));
 			obj->Physics()->SetCollisionShape(new CuboidCollisionShape(col_size));
-			obj->Physics()->SetOnCollisionCallback([](PhysicsObject* collidingObject){
+			obj->Physics()->SetOnCollisionCallback([](PhysicsObject* self, PhysicsObject* collidingObject){
 				NCLDebug::Log(Vector3(0.0f, 1.0f, 0.0f), "You are inside the garden!");
 				return false;
 			});
@@ -148,8 +148,7 @@ public:
 			PhysicsObject* obj = new PhysicsObject();
 			obj->SetPosition(Vector3(5.0f, 1.0f, 0.0f));
 			obj->SetCollisionShape(new SphereCollisionShape(1.0f));
-			obj->SetOnCollisionCallback(
-				[obj](PhysicsObject* collidingObject) {
+			obj->SetOnCollisionCallback([obj](PhysicsObject* self, PhysicsObject* collidingObject) {
 
 				NCLDebug::Log(Vector3(1.0f, 0.0f, 0.0f), "You found the secret!");
 

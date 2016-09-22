@@ -105,21 +105,21 @@ public:
 
 
 	//Draw Point (circle)
-	static void DrawPoint(const Vector3& pos, float point_radius, const Vector3& colour = Vector3(1.0f, 1.0f, 1.0f));
+	static void DrawPoint(const Vector3& pos, float point_radius, const Vector3& colour);
 	static void DrawPoint(const Vector3& pos, float point_radius, const Vector4& colour = Vector4(1.0f, 1.0f, 1.0f, 1.0f));
-	static void DrawPointNDT(const Vector3& pos, float point_radius, const Vector3& colour = Vector3(1.0f, 1.0f, 1.0f));
+	static void DrawPointNDT(const Vector3& pos, float point_radius, const Vector3& colour);
 	static void DrawPointNDT(const Vector3& pos, float point_radius, const Vector4& colour = Vector4(1.0f, 1.0f, 1.0f, 1.0f));
 
 	//Draw Line with a given thickness 
-	static void DrawThickLine(const Vector3& start, const Vector3& end, float line_width, const Vector3& colour = Vector3(1.0f, 1.0f, 1.0f));
+	static void DrawThickLine(const Vector3& start, const Vector3& end, float line_width, const Vector3& colour);
 	static void DrawThickLine(const Vector3& start, const Vector3& end, float line_width, const Vector4& colour = Vector4(1.0f, 1.0f, 1.0f, 1.0f));
-	static void DrawThickLineNDT(const Vector3& start, const Vector3& end, float line_width, const Vector3& colour = Vector3(1.0f, 1.0f, 1.0f));
+	static void DrawThickLineNDT(const Vector3& start, const Vector3& end, float line_width, const Vector3& colour);
 	static void DrawThickLineNDT(const Vector3& start, const Vector3& end, float line_width, const Vector4& colour = Vector4(1.0f, 1.0f, 1.0f, 1.0f));
 
 	//Draw line with thickness of 1 screen pixel regardless of distance from camera
-	static void DrawHairLine(const Vector3& start, const Vector3& end, const Vector3& colour = Vector3(1.0f, 1.0f, 1.0f));
+	static void DrawHairLine(const Vector3& start, const Vector3& end, const Vector3& colour);
 	static void DrawHairLine(const Vector3& start, const Vector3& end, const Vector4& colour = Vector4(1.0f, 1.0f, 1.0f, 1.0f));
-	static void DrawHairLineNDT(const Vector3& start, const Vector3& end, const Vector3& colour = Vector3(1.0f, 1.0f, 1.0f));
+	static void DrawHairLineNDT(const Vector3& start, const Vector3& end, const Vector3& colour);
 	static void DrawHairLineNDT(const Vector3& start, const Vector3& end, const Vector4& colour = Vector4(1.0f, 1.0f, 1.0f, 1.0f));
 
 	//Draw Matrix (x,y,z axis at pos)

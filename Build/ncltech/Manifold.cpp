@@ -5,7 +5,7 @@
 
 #define persistentThresholdSq 0.025f
 
-typedef std::list<Contact> ContactList;
+typedef std::list<ContactPoint> ContactList;
 typedef ContactList::iterator ContactListItr;
 
 Manifold::Manifold(PhysicsObject* nodeA, PhysicsObject* nodeB) : m_NodeA(nodeA), m_NodeB(nodeB)
@@ -20,13 +20,13 @@ Manifold::~Manifold()
 void Manifold::ApplyImpulse()
 {
 	float softness = (m_NodeA->GetInverseMass() + m_NodeB->GetInverseMass()) / m_Contacts.size();
-	for (Contact& contact : m_Contacts)
+	for (ContactPoint& contact : m_Contacts)
 	{
 		SolveContactPoint(contact);
 	}
 }
 
-void Manifold::SolveContactPoint(Contact& c)
+void Manifold::SolveContactPoint(ContactPoint& c)
 {
 	if (m_NodeA->GetInverseMass() + m_NodeB->GetInverseMass() == 0.0f)
 		return;
@@ -115,13 +115,13 @@ void Manifold::SolveContactPoint(Contact& c)
 
 void Manifold::PreSolverStep(float dt)
 {
-	for (Contact& contact : m_Contacts)
+	for (ContactPoint& contact : m_Contacts)
 	{
 		UpdateConstraint(contact);
 	}
 }
 
-void Manifold::UpdateConstraint(Contact& contact)
+void Manifold::UpdateConstraint(ContactPoint& contact)
 {
 	//Reset total impulse forces computed this physics timestep 
 	contact.sumImpulseContact = 0.0f;
@@ -159,7 +159,7 @@ void Manifold::AddContact(const Vector3& globalOnA, const Vector3& globalOnB, co
 	Vector3 r2 = (globalOnB - m_NodeB->GetPosition());
 
 	//Create our new contact descriptor
-	Contact contact;
+	ContactPoint contact;
 	contact.relPosA = r1;
 	contact.relPosB = r2;
 	contact.collisionNormal = normal;
@@ -174,7 +174,7 @@ void Manifold::DebugDraw() const
 	{
 		//Loop around all contact points and draw them all as a line-fan
 		Vector3 globalOnA1 = m_NodeA->GetPosition() + m_Contacts.back().relPosA;
-		for (const Contact& contact : m_Contacts)
+		for (const ContactPoint& contact : m_Contacts)
 		{
 			Vector3 globalOnA2 = m_NodeA->GetPosition() + contact.relPosA;
 			Vector3 globalOnB = m_NodeB->GetPosition() + contact.relPosB;

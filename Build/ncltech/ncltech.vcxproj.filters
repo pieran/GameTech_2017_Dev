@@ -39,129 +39,135 @@
     <Filter Include="src\Objects">
       <UniqueIdentifier>{6e1adfd7-ef55-4355-903b-3c632e0cffcb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\Physics\CollisionDetection">
+      <UniqueIdentifier>{150b318d-e0d2-4b45-8c58-e34eaf789937}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Physics\CollisionDetection">
+      <UniqueIdentifier>{4bf454d1-84d0-46d9-8740-b22508034ab4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ncltech\NCLDebug.cpp">
+    <ClCompile Include="NCLDebug.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="ncltech\Scene.cpp">
+    <ClCompile Include="Scene.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="ncltech\CollisionDetection.cpp">
+    <ClCompile Include="PhysicsEngine.cpp">
       <Filter>src\Physics</Filter>
     </ClCompile>
-    <ClCompile Include="ncltech\CommonMeshes.cpp">
+    <ClCompile Include="PhysicsObject.cpp">
+      <Filter>src\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Hull.cpp">
+      <Filter>src\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="CommonMeshes.cpp">
       <Filter>src\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="ncltech\Constraint.cpp">
+    <ClCompile Include="SceneManager.cpp">
+      <Filter>src\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneRenderer.cpp">
+      <Filter>src\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="ScreenPicker.cpp">
+      <Filter>src\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderList.cpp">
+      <Filter>src\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>src\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Manifold.cpp">
       <Filter>src\Physics\Constraints</Filter>
     </ClCompile>
-    <ClCompile Include="ncltech\CuboidCollisionShape.cpp">
+    <ClCompile Include="Constraint.cpp">
+      <Filter>src\Physics\Constraints</Filter>
+    </ClCompile>
+    <ClCompile Include="SphereCollisionShape.cpp">
       <Filter>src\Physics\CollisionShapes</Filter>
     </ClCompile>
-    <ClCompile Include="ncltech\Hull.cpp">
-      <Filter>src\Physics</Filter>
+    <ClCompile Include="CuboidCollisionShape.cpp">
+      <Filter>src\Physics\CollisionShapes</Filter>
     </ClCompile>
-    <ClCompile Include="ncltech\Manifold.cpp">
-      <Filter>src\Physics\Constraints</Filter>
-    </ClCompile>
-    <ClCompile Include="ncltech\Object.cpp">
+    <ClCompile Include="ObjectMesh.cpp">
       <Filter>src\Objects</Filter>
     </ClCompile>
-    <ClCompile Include="ncltech\ObjectMesh.cpp">
+    <ClCompile Include="ObjectMeshDragable.cpp">
       <Filter>src\Objects</Filter>
     </ClCompile>
-    <ClCompile Include="ncltech\ObjectMeshDragable.cpp">
-      <Filter>src\Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="ncltech\PhysicsEngine.cpp">
-      <Filter>src\Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="ncltech\PhysicsObject.cpp">
-      <Filter>src\Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="ncltech\RenderList.cpp">
-      <Filter>src\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="ncltech\SceneManager.cpp">
-      <Filter>src\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="ncltech\SceneRenderer.cpp">
-      <Filter>src\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="ncltech\ScreenPicker.cpp">
-      <Filter>src\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="ncltech\SphereCollisionShape.cpp">
-      <Filter>src\Graphics</Filter>
+    <ClCompile Include="CollisionDetectionSAT.cpp">
+      <Filter>src\Physics\CollisionDetection</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ncltech\NCLDebug.h">
+    <ClInclude Include="NCLDebug.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="ncltech\TSingleton.h">
+    <ClInclude Include="Scene.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="ncltech\BoundingBox.h">
-      <Filter>include\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="ncltech\CollisionDetection.h">
-      <Filter>include\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="ncltech\CollisionShape.h">
-      <Filter>include\Physics\CollisionShapes</Filter>
-    </ClInclude>
-    <ClInclude Include="ncltech\CommonMeshes.h">
-      <Filter>include\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="ncltech\Constraint.h">
-      <Filter>include\Physics\Constraints</Filter>
-    </ClInclude>
-    <ClInclude Include="ncltech\CuboidCollisionShape.h">
-      <Filter>include\Physics\CollisionShapes</Filter>
-    </ClInclude>
-    <ClInclude Include="ncltech\DistanceConstraint.h">
-      <Filter>include\Physics\Constraints</Filter>
-    </ClInclude>
-    <ClInclude Include="ncltech\Hull.h">
-      <Filter>include\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="ncltech\Manifold.h">
-      <Filter>include\Physics\Constraints</Filter>
-    </ClInclude>
-    <ClInclude Include="ncltech\Object.h">
-      <Filter>include\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="ncltech\ObjectMesh.h">
-      <Filter>include\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="ncltech\ObjectMeshDragable.h">
-      <Filter>include\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="ncltech\PhysicsEngine.h">
-      <Filter>include\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="ncltech\PhysicsObject.h">
-      <Filter>include\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="ncltech\RenderList.h">
-      <Filter>include\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="ncltech\SceneManager.h">
-      <Filter>include\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="ncltech\SceneRenderer.h">
-      <Filter>include\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="ncltech\ScreenPicker.h">
-      <Filter>include\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="ncltech\SphereCollisionShape.h">
-      <Filter>include\Physics\CollisionShapes</Filter>
-    </ClInclude>
-    <ClInclude Include="ncltech\Scene.h">
+    <ClInclude Include="TSingleton.h">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="BoundingBox.h">
+      <Filter>include\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonMeshes.h">
+      <Filter>include\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderList.h">
+      <Filter>include\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneManager.h">
+      <Filter>include\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneRenderer.h">
+      <Filter>include\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="ScreenPicker.h">
+      <Filter>include\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Hull.h">
+      <Filter>include\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="PhysicsEngine.h">
+      <Filter>include\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="PhysicsObject.h">
+      <Filter>include\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionShape.h">
+      <Filter>include\Physics\CollisionShapes</Filter>
+    </ClInclude>
+    <ClInclude Include="CuboidCollisionShape.h">
+      <Filter>include\Physics\CollisionShapes</Filter>
+    </ClInclude>
+    <ClInclude Include="SphereCollisionShape.h">
+      <Filter>include\Physics\CollisionShapes</Filter>
+    </ClInclude>
+    <ClInclude Include="DistanceConstraint.h">
+      <Filter>include\Physics\Constraints</Filter>
+    </ClInclude>
+    <ClInclude Include="Manifold.h">
+      <Filter>include\Physics\Constraints</Filter>
+    </ClInclude>
+    <ClInclude Include="Constraint.h">
+      <Filter>include\Physics\Constraints</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>include\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectMesh.h">
+      <Filter>include\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectMeshDragable.h">
+      <Filter>include\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionDetectionSAT.h">
+      <Filter>include\Physics\CollisionDetection</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

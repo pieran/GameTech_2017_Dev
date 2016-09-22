@@ -71,12 +71,17 @@ void CuboidCollisionShape::GetEdges(const PhysicsObject* currentObject, std::vec
 	}
 }
 
-void CuboidCollisionShape::GetMinMaxVertexOnAxis(const PhysicsObject* currentObject, const Vector3& axis, Vector3* out_min, Vector3* out_max) const
+void CuboidCollisionShape::GetMinMaxVertexOnAxis(
+	const PhysicsObject* currentObject,
+	const Vector3& axis,
+	Vector3* out_min,
+	Vector3* out_max) const
 {
 	Matrix4 wsTransform = currentObject->GetWorldSpaceTransform() * Matrix4::Scale(m_CuboidHalfDimensions);
 
 	Matrix3 invNormalMatrix = Matrix3::Transpose(Matrix3(wsTransform));
 	Vector3 local_axis = invNormalMatrix * axis;
+	//local_axis.Normalise();
 
 	int vMin, vMax;
 	m_CubeHull.GetMinMaxVerticesInAxis(local_axis, &vMin, &vMax);
@@ -85,7 +90,12 @@ void CuboidCollisionShape::GetMinMaxVertexOnAxis(const PhysicsObject* currentObj
 	if (out_max) *out_max = wsTransform * m_CubeHull.GetVertex(vMax).pos;
 }
 
-void CuboidCollisionShape::GetIncidentReferencePolygon(const PhysicsObject* currentObject, const Vector3& axis, std::list<Vector3>* out_face, Vector3* out_normal, std::vector<Plane>* out_adjacent_planes) const
+void CuboidCollisionShape::GetIncidentReferencePolygon(
+	const PhysicsObject* currentObject,
+	const Vector3& axis,
+	std::list<Vector3>* out_face,
+	Vector3* out_normal,
+	std::vector<Plane>* out_adjacent_planes) const
 {
 	Matrix4 wsTransform = currentObject->GetWorldSpaceTransform() * Matrix4::Scale(m_CuboidHalfDimensions);
 

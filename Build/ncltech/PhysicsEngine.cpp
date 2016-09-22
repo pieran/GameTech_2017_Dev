@@ -1,6 +1,6 @@
 #include "PhysicsEngine.h"
 #include "Object.h"
-#include "CollisionDetection.h"
+#include "CollisionDetectionSAT.h"
 #include "NCLDebug.h"
 #include <nclgl\Window.h>
 
@@ -218,7 +218,10 @@ void PhysicsEngine::NarrowPhaseCollisions()
 {
 	if (m_BroadphaseCollisionPairs.size() > 0)
 	{
-		CollisionData coldata;
+		CollisionData colData;
+		CollisionDetectionSAT colDetect;
+
+		
 		CollisionShape *shapeA, *shapeB;
 
 		for (CollisionPair& cp : m_BroadphaseCollisionPairs)
@@ -226,23 +229,32 @@ void PhysicsEngine::NarrowPhaseCollisions()
 			shapeA = cp.objectA->GetCollisionShape();
 			shapeB = cp.objectB->GetCollisionShape();
 
-			if (CollisionDetection::Instance()->CheckCollision(cp.objectA, cp.objectB, shapeA, shapeB, &coldata))
+			colDetect.BeginNewPair(
+				cp.objectA,
+				cp.objectB,
+				cp.objectA->GetCollisionShape(),
+				cp.objectB->GetCollisionShape());
+
+
+			if (colDetect.AreColliding(&colData))
 			{
+				//Draw collision data to the window
 				if (m_DebugDrawFlags & DEBUHDRAW_FLAGS_COLLISIONNORMALS)
 				{
-					NCLDebug::DrawPointNDT(coldata.pointOnPlane, 0.1f, Vector4(0.5f, 0.5f, 1.0f, 1.0f));
-					NCLDebug::DrawThickLineNDT(coldata.pointOnPlane, coldata.pointOnPlane - coldata.normal * coldata.penetration, 0.05f, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+					NCLDebug::DrawPointNDT(colData.pointOnPlane, 0.1f, Vector4(0.5f, 0.5f, 1.0f, 1.0f));
+					NCLDebug::DrawThickLineNDT(colData.pointOnPlane, colData.pointOnPlane - colData.normal * colData.penetration, 0.05f, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
 				}
 
-				bool okA = cp.objectA->m_OnCollisionCallback(cp.objectB);
-				bool okB = cp.objectB->m_OnCollisionCallback(cp.objectA);
+				//Check to see if any of the objects have collision callbacks that dont want the objects to physically collide
+				bool okA = cp.objectA->FireOnCollisionEvent(cp.objectA, cp.objectB);
+				bool okB = cp.objectB->FireOnCollisionEvent(cp.objectA, cp.objectB);
 
 				if (okA && okB)
 				{
-					//If both objects are colliding, and both callbacks allow for default collision resolution we will build a full collision manifold
+					//Build full collision manifold that will also handle the collision response between the two objects in the solver stage
 					Manifold* manifold = new Manifold(cp.objectA, cp.objectB);
 					m_Manifolds.push_back(manifold);
-					CollisionDetection::Instance()->BuildCollisionManifold(cp.objectA, cp.objectB, shapeA, shapeB, coldata, manifold);
+					colDetect.GenContactPoints(manifold);
 				}
 			}
 		}

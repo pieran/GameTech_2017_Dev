@@ -30,7 +30,7 @@ additional constraints of friction and also elasticity in the form of a bias ter
    along with two friction constraints going along the axes perpendicular to the collision
    normal.
 */
-struct Contact
+struct ContactPoint
 {
 	float   sumImpulseContact;
 	Vector3 sumImpulseFriction;
@@ -67,11 +67,11 @@ public:
 	PhysicsObject* NodeA() { return m_NodeA; }
 	PhysicsObject* NodeB() { return m_NodeB; }
 protected:
-	void SolveContactPoint(Contact& c);
-	void UpdateConstraint(Contact& c);
+	void SolveContactPoint(ContactPoint& c);
+	void UpdateConstraint(ContactPoint& c);
 
 protected:
-	PhysicsObject*			m_NodeA;
-	PhysicsObject*			m_NodeB;
-	std::vector<Contact>	m_Contacts;
+	PhysicsObject*				m_NodeA;
+	PhysicsObject*				m_NodeB;
+	std::vector<ContactPoint>	m_Contacts;
 };

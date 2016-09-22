@@ -30,7 +30,7 @@ void Object::CreatePhysicsNode()
 	if (m_PhysicsObject == NULL)
 	{
 		m_PhysicsObject = new PhysicsObject();
-		m_PhysicsObject->m_Parent = this;
+		m_PhysicsObject->SetAssociatedObject(this);
 		PhysicsEngine::Instance()->AddPhysicsObject(m_PhysicsObject);
 	}
 }
