@@ -20,9 +20,6 @@
     <ClInclude Include="ObjectPlayer.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="PerfTimer.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="Utils.h">
       <Filter>include</Filter>
     </ClInclude>

@@ -5,6 +5,8 @@
 #include <nclgl\Window.h>
 
 
+#include "..\REMOVEME_Broadphase.h"
+
 void PhysicsEngine::SetDefaults()
 {
 	m_DebugDrawFlags = NULL;
@@ -13,6 +15,11 @@ void PhysicsEngine::SetDefaults()
 	m_UpdateAccum = 0.0f;
 	m_Gravity = Vector3(0.0f, -9.81f, 0.0f);
 	m_DampingFactor = 0.999f;
+
+
+	//!!!!!!!!!!!!!!!!!!!!!!!!! REMOVE ME !!!!!!!!!!!!!!!!!!
+	REMOVEME_Broadphase::Instance()->ClearAll();
+	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }
 
 PhysicsEngine::PhysicsEngine()
@@ -162,6 +169,13 @@ void PhysicsEngine::UpdatePhysicsObjects()
 
 void PhysicsEngine::UpdatePhysicsObject(PhysicsObject* obj)
 {
+//!!!!!!!!!!!!!!!!!!!!!!!!! REMOVE ME !!!!!!!!!!!!!!!!!!
+	if (!obj->awake)
+		return;
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
 	//Semi-Implicit Euler Intergration
 	obj->m_LinearVelocity += obj->m_Force * obj->m_InvMass * m_UpdateTimestep;
 
@@ -183,6 +197,21 @@ void PhysicsEngine::UpdatePhysicsObject(PhysicsObject* obj)
 	obj->m_Orientation = obj->m_Orientation + obj->m_Orientation*(obj->m_AngularVelocity*m_UpdateTimestep*0.5f); //Quaternion equiv of the above position calculation
 	obj->m_Orientation.Normalise();
 
+	//!!!!!!!!!!!!!!!!!!!!!!!!! REMOVE ME !!!!!!!!!!!!!!!!!!
+	obj->awake = (obj->m_LinearVelocity.LengthSquared() + obj->m_AngularVelocity.LengthSquared() > 0.001f);
+	REMOVEME_Broadphase::Instance()->UpdateObject(obj);
+	Object* gobj = obj->GetGameObject();
+	if (gobj != NULL)
+	{
+		if (gobj->GetName() == "Cubicle")
+		{
+			const Vector4& awake_colour = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
+			const Vector4& sleep_colour = Vector4(0.6f, 0.6f, 0.6f, 1.0f);
+			gobj->SetColour(obj->awake ? awake_colour : sleep_colour);
+		}
+	}
+	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 	obj->m_wsTransformInvalidated = true; //inform the physics object that it's world space transform is invalid
 }
 
@@ -190,7 +219,12 @@ void PhysicsEngine::BroadPhaseCollisions()
 {
 	m_BroadphaseCollisionPairs.clear();
 
-	PhysicsObject *objA, *objB;
+//!!!!!!!!!!!!!!!!!!!!!!!!! REMOVE ME !!!!!!!!!!!!!!!!!!
+	REMOVEME_Broadphase::Instance()->BuildCollisionPairs(m_BroadphaseCollisionPairs);
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+	/*PhysicsObject *objA, *objB;
 
 	//This is a brute force broadphase, basically compiling a list to check every object against every other object
 	for (size_t i = 0; i < m_PhysicsObjects.size() - 1; ++i)
@@ -211,7 +245,7 @@ void PhysicsEngine::BroadPhaseCollisions()
 			}
 				
 		}
-	}
+	}*/
 }
 
 void PhysicsEngine::NarrowPhaseCollisions()
@@ -239,6 +273,12 @@ void PhysicsEngine::NarrowPhaseCollisions()
 
 				if (okA && okB)
 				{
+					//!!!!!!!!!!!!!!!!!!!!!!!!! REMOVE ME !!!!!!!!!!!!!!!!!!
+					cp.objectA->awake = true;
+					cp.objectB->awake = true;
+					//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
 					//If both objects are colliding, and both callbacks allow for default collision resolution we will build a full collision manifold
 					Manifold* manifold = new Manifold(cp.objectA, cp.objectB);
 					m_Manifolds.push_back(manifold);
@@ -276,6 +316,6 @@ void PhysicsEngine::SolveConstraints()
 			c->ApplyImpulse();
 		}
 
-		factor *= 0.75f;
+		factor *= 0.9f;
 	}
 }

@@ -49,7 +49,7 @@ public:
 
 	const Matrix4& GetWorldSpaceTransform()     const;
 
-
+	Object*				GetGameObject()			const { return m_Parent; }
 
 	//<--------- SETTERS ------------->
 	void SetElasticity(float elasticity)			{ m_Elasticity = elasticity; }
@@ -70,6 +70,13 @@ public:
 
 	void SetOnCollisionCallback(std::function<bool(PhysicsObject*)> onCollisionFunction) { m_OnCollisionCallback = onCollisionFunction; }
 
+
+
+
+	//!!!!!!!REMOVE ME!!!!!!!!!!!
+	void* broadphase_ptr = NULL;
+	bool awake = true;
+	//!!!!!!!!!!!!!!!!!!!!!!!!!!!
 protected:
 	Object*				m_Parent;
 

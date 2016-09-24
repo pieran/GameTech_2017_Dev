@@ -51,8 +51,8 @@ void Manifold::SolveContactPoint(Contact& c, float solver_factor)
 		float b = 0.0f;
 		{
 			float distance_offset = c.collisionPenetration;
-			float baumgarte_scalar = 0.1f;
-			float baumgarte_slop = 0.01f;
+			float baumgarte_scalar = 0.3f;
+			float baumgarte_slop = 0.00f;
 			float penetration_slop = min(c.collisionPenetration + baumgarte_slop, 0.0f);
 			b = -(baumgarte_scalar / PhysicsEngine::Instance()->GetDeltaTime()) * penetration_slop;
 		}

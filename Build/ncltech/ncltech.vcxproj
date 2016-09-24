@@ -114,6 +114,8 @@
     <ClInclude Include="ncltech\ScreenPicker.h" />
     <ClInclude Include="ncltech\SphereCollisionShape.h" />
     <ClInclude Include="ncltech\TSingleton.h" />
+    <ClInclude Include="PerfTimer.h" />
+    <ClInclude Include="REMOVEME_Broadphase.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

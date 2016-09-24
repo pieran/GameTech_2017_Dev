@@ -3,7 +3,7 @@
 
 # User-specific files
 *.suo
-*.user
+#*.user #We need this to copy working directory!
 *.userosscache
 *.sln.docstates
 

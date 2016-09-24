@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{D192B821-D0C4-423B-83B0-0D452FC1012D}</ProjectGuid>
+    <ProjectGuid>{F12E6C9B-3A3C-464D-8718-45E33B08C9EB}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>GameTech_Program</RootNamespace>
+    <RootNamespace>Network_Dummy</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -41,13 +41,9 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)\ncltech;$(SolutionDir)\nclgl;$(SolutionDir)\ExternalLibs\GLEW\include;$(SolutionDir)\ExternalLibs\SOIL;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\$(Configuration);$(SolutionDir)\ExternalLibs\GLEW\lib\$(Configuration);$(SolutionDir)\ExternalLibs\SOIL\$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)\ncltech;$(SolutionDir)\nclgl;$(SolutionDir)\ExternalLibs\GLEW\include;$(SolutionDir)\ExternalLibs\SOIL;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\$(Configuration);$(SolutionDir)\ExternalLibs\GLEW\lib\$(Configuration);$(SolutionDir)\ExternalLibs\SOIL\$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -56,12 +52,10 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>nclgl.lib;ncltech.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -73,32 +67,16 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>nclgl.lib;ncltech.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="GameTechTutorial1.h" />
-    <ClInclude Include="GameTechTutorial2.h" />
-    <ClInclude Include="GameTechTutorial3.h" />
-    <ClInclude Include="GameTechTutorial4.h" />
-    <ClInclude Include="GraphicsScene.h" />
-    <ClInclude Include="ObjectPlayer.h" />
-    <ClInclude Include="PhysicsScene1.h" />
-    <ClInclude Include="PhysicsScene2.h" />
-    <ClInclude Include="PhysicsScene3.h" />
-    <ClInclude Include="Utils.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="GraphicsScene.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="Utils.cpp" />
+    <ClCompile Include="dummy.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
