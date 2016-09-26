@@ -3,7 +3,7 @@
 #include "CollisionDetectionSAT.h"
 #include "NCLDebug.h"
 #include <nclgl\Window.h>
-
+#include <omp.h>
 
 #include "REMOVEME_Broadphase.h"
 
@@ -40,11 +40,6 @@ PhysicsEngine::~PhysicsEngine()
 		delete c;
 	}
 	m_Constraints.clear();
-
-	for (Manifold* m : m_Manifolds)
-	{
-		delete m;
-	}
 	m_Manifolds.clear();
 }
 
@@ -258,53 +253,76 @@ void PhysicsEngine::NarrowPhaseCollisions()
 {
 	if (m_BroadphaseCollisionPairs.size() > 0)
 	{
-		CollisionData colData;
-		CollisionDetectionSAT colDetect;
 
-		
-		CollisionShape *shapeA, *shapeB;
 
-		for (CollisionPair& cp : m_BroadphaseCollisionPairs)
+#pragma omp parallel
 		{
-			shapeA = cp.objectA->GetCollisionShape();
-			shapeB = cp.objectB->GetCollisionShape();
+			CollisionData colData;
+			CollisionDetectionSAT colDetect;
+			CollisionShape *shapeA, *shapeB;
 
-			colDetect.BeginNewPair(
-				cp.objectA,
-				cp.objectB,
-				cp.objectA->GetCollisionShape(),
-				cp.objectB->GetCollisionShape());
+			std::vector<Manifold*> private_man;
 
-
-			if (colDetect.AreColliding(&colData))
+#pragma omp for nowait schedule(static)
+			for (int i = 0; i < (int)m_BroadphaseCollisionPairs.size(); ++i)
 			{
-				//Draw collision data to the window
-				if (m_DebugDrawFlags & DEBUHDRAW_FLAGS_COLLISIONNORMALS)
+				CollisionPair& cp = m_BroadphaseCollisionPairs[i];
+
+				shapeA = cp.objectA->GetCollisionShape();
+				shapeB = cp.objectB->GetCollisionShape();
+
+				colDetect.BeginNewPair(
+					cp.objectA,
+					cp.objectB,
+					cp.objectA->GetCollisionShape(),
+					cp.objectB->GetCollisionShape());
+
+
+				if (colDetect.AreColliding(&colData))
 				{
-					NCLDebug::DrawPointNDT(colData.pointOnPlane, 0.1f, Vector4(0.5f, 0.5f, 1.0f, 1.0f));
-					NCLDebug::DrawThickLineNDT(colData.pointOnPlane, colData.pointOnPlane - colData.normal * colData.penetration, 0.05f, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
-				}
+					//Draw collision data to the window
+					if (m_DebugDrawFlags & DEBUHDRAW_FLAGS_COLLISIONNORMALS)
+					{
+						NCLDebug::DrawPointNDT(colData.pointOnPlane, 0.1f, Vector4(0.5f, 0.5f, 1.0f, 1.0f));
+						NCLDebug::DrawThickLineNDT(colData.pointOnPlane, colData.pointOnPlane - colData.normal * colData.penetration, 0.05f, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+					}
 
-				//Check to see if any of the objects have collision callbacks that dont want the objects to physically collide
-				bool okA = cp.objectA->FireOnCollisionEvent(cp.objectA, cp.objectB);
-				bool okB = cp.objectB->FireOnCollisionEvent(cp.objectA, cp.objectB);
+					//Check to see if any of the objects have collision callbacks that dont want the objects to physically collide
+					bool okA = cp.objectA->FireOnCollisionEvent(cp.objectA, cp.objectB);
+					bool okB = cp.objectB->FireOnCollisionEvent(cp.objectA, cp.objectB);
 
-				if (okA && okB)
-				{
+					if (okA && okB)
+					{
 
-					//Build full collision manifold that will also handle the collision response between the two objects in the solver stage
+						//Build full collision manifold that will also handle the collision response between the two objects in the solver stage
 
-					//!!!!!!!!!!!!!!!!!!!!!!!!! REMOVE ME !!!!!!!!!!!!!!!!!!
-					cp.objectA->awake = true;
-					cp.objectB->awake = true;
-					//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+						//!!!!!!!!!!!!!!!!!!!!!!!!! REMOVE ME !!!!!!!!!!!!!!!!!!
+						cp.objectA->awake = cp.objectA->GetInverseMass() > 0.0001f;
+						cp.objectB->awake = cp.objectB->GetInverseMass() > 0.0001f;
+						//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-					Manifold* manifold = new Manifold(cp.objectA, cp.objectB);
-					m_Manifolds.push_back(manifold);
-					colDetect.GenContactPoints(manifold);
+						Manifold* manifold = new Manifold();
+						manifold->Initiate(cp.objectA, cp.objectB);
+						colDetect.GenContactPoints(manifold);
+						private_man.push_back(manifold);
+						/*#pragma omp critical
+												{
+												m_Manifolds.push_back(manifold);
+												}*/
+					}
 				}
 			}
-		}
+
+
+#pragma omp for schedule(static) ordered
+			for (int i = 0; i < omp_get_num_threads(); i++) {
+#pragma omp ordered
+				m_Manifolds.insert(m_Manifolds.end(), private_man.begin(), private_man.end());
+			}
+
+		} //End Parallel
+
+
 	}
 }
 

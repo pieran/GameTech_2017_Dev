@@ -7,7 +7,7 @@
 #include <ncltech\PhysicsObject.h>
 #include <ncltech\PhysicsEngine.h>
 #include <ncltech\SphereCollisionShape.h>
-#include <ncltech\..\REMOVEME_Broadphase.h>
+#include <ncltech\REMOVEME_Broadphase.h>
 
 class Player : public ObjectMesh
 {
@@ -36,9 +36,9 @@ public:
 		m_ImpactRadii = new PhysicsObject();
 		m_ImpactRadii->SetCollisionShape(new SphereCollisionShape(pull_radius));
 		m_ImpactRadii->awake = false;
-		m_ImpactRadii->SetOnCollisionCallback([&](PhysicsObject* other_obj)
+		m_ImpactRadii->SetOnCollisionCallback([&](PhysicsObject* self_obj, PhysicsObject* other_obj)
 		{
-			/*Object* gobj = other_obj->GetGameObject();
+			Object* gobj = other_obj->GetAssociatedObject();
 			if (gobj != NULL && gobj->GetName() == "Cubicle")
 			{
 				Vector3 ab_norm = Physics()->GetPosition() - other_obj->GetPosition();
@@ -50,7 +50,9 @@ public:
 				other_obj->SetLinearVelocity(- ab_norm * strength / (ab_len + 1.0f));
 
 				other_obj->awake = true;
-			}*/
+			}
+
+
 
 			return false;
 		});
@@ -62,8 +64,8 @@ public:
 	{
 		if (m_ImpactRadii != NULL)
 		{
-			PhysicsEngine::Instance()->RemovePhysicsObject(m_ImpactRadii);
-			delete m_ImpactRadii;
+			//PhysicsEngine::Instance()->RemovePhysicsObject(m_ImpactRadii);
+			//delete m_ImpactRadii;
 			m_ImpactRadii = NULL;
 		}
 	}

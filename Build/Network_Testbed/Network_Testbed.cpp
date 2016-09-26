@@ -2,9 +2,9 @@
 #include <ncltech\PhysicsEngine.h>
 #include <ncltech\SceneManager.h>
 #include <ncltech\NCLDebug.h>
+#include <ncltech\PerfTimer.h>
 
 #include "stdafx.h"
-#include <ncltech\..\PerfTimer.h>
 #include "NetworkEvalScene.h"
 
 

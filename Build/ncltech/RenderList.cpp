@@ -67,7 +67,7 @@ void RenderList::UpdateCameraWorldPos(const Vector3& cameraPos)
 	auto update_list = [&](std::vector<RenderList_Object>& list, float mul)
 	{
 #pragma omp parallel for
-		for (int i = 0, size = (int)list.size(); i < size; i++)
+		for (int i = 0; i < (int)list.size(); i++)
 		{
 			list[i].cam_dist_sq = (list[i].target_obj->m_WorldTransform.GetPositionVector() - m_CameraPos).LengthSquared() * mul;
 		}

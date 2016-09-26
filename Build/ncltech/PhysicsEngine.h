@@ -133,8 +133,6 @@ protected:
 
 	std::vector<PhysicsObject*> m_PhysicsObjects;
 
-	std::vector<Constraint*>	m_Constraints;			// Misc constraints between pairs of objects
+	std::vector<Constraint*>	m_Constraints;			// Misc constraints between pairs of object
 	std::vector<Manifold*>		m_Manifolds;			// Contact constraints between pairs of objects
-
-	std::mutex					m_ManifoldsMutex;
 };

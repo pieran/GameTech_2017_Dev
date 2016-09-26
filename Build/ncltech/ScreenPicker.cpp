@@ -59,7 +59,7 @@ void ScreenPicker::UnregisterObject(Object* obj)
 
 	//Iterate through all remaining objects and update their indices
 #pragma omp parallel for
-	for (int i = 0, len = (int)m_AllRegisteredObjects.size(); i < len; ++i)
+	for (int i = 0; i < (int)m_AllRegisteredObjects.size(); ++i)
 	{
 		m_AllRegisteredObjects[i]->m_ScreenPickerIdx = i + 1;
 	}

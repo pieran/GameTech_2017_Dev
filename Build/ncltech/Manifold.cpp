@@ -8,13 +8,23 @@
 typedef std::list<ContactPoint> ContactList;
 typedef ContactList::iterator ContactListItr;
 
-Manifold::Manifold(PhysicsObject* nodeA, PhysicsObject* nodeB) : m_NodeA(nodeA), m_NodeB(nodeB)
+Manifold::Manifold() 
+	: m_NodeA(NULL)
+	, m_NodeB(NULL)
 {
 }
 
 Manifold::~Manifold()
 {
 
+}
+
+void Manifold::Initiate(PhysicsObject* nodeA, PhysicsObject* nodeB)
+{
+	m_Contacts.clear();
+
+	m_NodeA = nodeA;
+	m_NodeB = nodeB;
 }
 
 void Manifold::ApplyImpulse(float solver_factor)

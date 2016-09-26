@@ -49,8 +49,11 @@ struct ContactPoint
 class Manifold
 {
 public:
-	Manifold(PhysicsObject* nodeA, PhysicsObject* nodeB);
+	Manifold();
 	~Manifold();
+
+	//Initiate for collision pair
+	void Initiate(PhysicsObject* nodeA, PhysicsObject* nodeB);
 
 	//Called whenever a new collision contact between A & B are found
 	void AddContact(const Vector3& globalOnA, const Vector3& globalOnB, const Vector3& normal, const float& penetration);	
