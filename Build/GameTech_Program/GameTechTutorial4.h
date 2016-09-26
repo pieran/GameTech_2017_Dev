@@ -49,7 +49,7 @@ public:
 			{
 				Vector4 colour = Utils::GenColour(0.7f + i * 0.05f, 1.0f);
 				Object* obj = Utils::BuildSphereObject("", Vector3(-5.0f + i * 1.25f, 5.5f, 6.0f), 0.5f, 1.0f, true, true, colour);
-				obj->Physics()->SetFriction(0.5f);
+				obj->Physics()->SetFriction(0.1f);
 				obj->Physics()->SetElasticity(i * 0.1f + 0.5f);
 				this->AddGameObject(obj);
 			}

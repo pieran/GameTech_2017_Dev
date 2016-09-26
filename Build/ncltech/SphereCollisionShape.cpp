@@ -20,8 +20,9 @@ SphereCollisionShape::~SphereCollisionShape()
 
 Matrix3 SphereCollisionShape::BuildInverseInertia(float invMass) const
 {
-	float i = 2.5f * invMass * m_Radius * m_Radius; //SOLID
-	//float i = 1.5f * invMass * m_Radius * m_Radius; //HOLLOW
+	//https://en.wikipedia.org/wiki/List_of_moments_of_inertia
+	float i = 2.5f * invMass / (m_Radius * m_Radius); //SOLID
+	//float i = 1.5f * invMass / (m_Radius * m_Radius); //HOLLOW
 
 	Matrix3 inertia;
 	inertia._11 = i;

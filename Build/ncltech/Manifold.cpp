@@ -17,16 +17,17 @@ Manifold::~Manifold()
 
 }
 
-void Manifold::ApplyImpulse()
+void Manifold::ApplyImpulse(float solver_factor)
 {
 	float softness = (m_NodeA->GetInverseMass() + m_NodeB->GetInverseMass()) / m_Contacts.size();
 	for (ContactPoint& contact : m_Contacts)
 	{
-		SolveContactPoint(contact);
+		SolveContactPoint(contact, solver_factor);
 	}
 }
 
-void Manifold::SolveContactPoint(ContactPoint& c)
+
+void Manifold::SolveContactPoint(Contact& c, float solver_factor)
 {
 	if (m_NodeA->GetInverseMass() + m_NodeB->GetInverseMass() == 0.0f)
 		return;
@@ -51,14 +52,13 @@ void Manifold::SolveContactPoint(ContactPoint& c)
 		float b = 0.0f;
 		{
 			float distance_offset = c.collisionPenetration;
-			float baumgarte_scalar = 0.1f;
-			float baumgarte_slop = 0.01f;
+			float baumgarte_scalar = 0.3f;
+			float baumgarte_slop = 0.00f;
 			float penetration_slop = min(c.collisionPenetration + baumgarte_slop, 0.0f);
 			b = -(baumgarte_scalar / PhysicsEngine::Instance()->GetDeltaTime()) * penetration_slop;
 		}
 
-
-		float jn = -(Vector3::Dot(dv, normal) + b + c.elatisity_term) / constraintMass;
+		float jn = -(Vector3::Dot(dv, normal) + c.elatisity_term + b) / constraintMass * solver_factor;
 
 		//As this is run multiple times per frame,
 		// we need to clamp the total amount of movement to be positive
@@ -145,8 +145,11 @@ void Manifold::UpdateConstraint(ContactPoint& contact)
 		// It works out if the elastic term is less than a given value (0.5 m/s here)
 		// and if it is, then it is too small to see and ignores the elasticity calculation.
 		// Most noticable when you have a stack of objects, without this they will jitter alot.
-		const float elasticity_slop = 0.5f;
-		contact.elatisity_term = max(elatisity_term - elasticity_slop, 0.0f);
+		const float elasticity_slop = 0.2f;
+		if (elatisity_term < elatisity_term)
+			elatisity_term = 0.0f;
+
+		contact.elatisity_term = elatisity_term;
 	}
 
 }
@@ -165,7 +168,38 @@ void Manifold::AddContact(const Vector3& globalOnA, const Vector3& globalOnB, co
 	contact.collisionNormal = normal;
 	contact.collisionPenetration = penetration;
 
-	m_Contacts.push_back(contact);
+
+	//Check to see if we already contain a contact point almost in that location
+	const float min_allowed_dist_sq = 0.2f * 0.2f;
+	bool should_add = true;
+	for (auto itr = m_Contacts.begin(); itr != m_Contacts.end(); )
+	{
+		Vector3 ab = itr->relPosA - contact.relPosA;
+		float distsq = Vector3::Dot(ab, ab);
+
+
+		//Choose the contact point with the largest penetration and therefore the largest collision response
+		if (distsq < min_allowed_dist_sq)
+		{
+			if (itr->collisionPenetration > contact.collisionPenetration)
+			{
+				itr = m_Contacts.erase(itr);
+				continue;
+			}
+			else
+			{
+				should_add = false;
+			}
+			
+		}
+		
+		itr++;
+	}
+
+
+	
+	if (should_add)
+		m_Contacts.push_back(contact);
 }
 
 void Manifold::DebugDraw() const

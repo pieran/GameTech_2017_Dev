@@ -94,7 +94,6 @@ enum ScreenTextures //..or GBuffer
 #define PROJ_NEAR				0.01f			//Nearest object @ 1cm
 #define PROJ_FOV				45.0f			//45 degree field of view
 
-
 class SceneRenderer : public OGLRenderer
 {
 public:

@@ -169,5 +169,11 @@
     <ClInclude Include="CollisionDetectionSAT.h">
       <Filter>include\Physics\CollisionDetection</Filter>
     </ClInclude>
+    <ClInclude Include="PerfTimer.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="REMOVEME_Broadphase.h">
+      <Filter>include\Physics</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

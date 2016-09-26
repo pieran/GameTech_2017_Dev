@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{D192B821-D0C4-423B-83B0-0D452FC1012D}</ProjectGuid>
+    <ProjectGuid>{20E7A13F-AB6F-48E8-83D5-E513991D01CC}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>GameTech_Program</RootNamespace>
+    <RootNamespace>Network_Testbed</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -41,12 +41,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir);$(SolutionDir)\ExternalLibs\GLEW\include;$(SolutionDir)\ExternalLibs\SOIL;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\ncltech;$(SolutionDir)\nclgl;$(SolutionDir)\ExternalLibs\GLEW\include;$(SolutionDir)\ExternalLibs\SOIL;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)\$(Configuration);$(SolutionDir)\ExternalLibs\GLEW\lib\$(Configuration);$(SolutionDir)\ExternalLibs\SOIL\$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir);$(SolutionDir)\ExternalLibs\GLEW\include;$(SolutionDir)\ExternalLibs\SOIL;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\ncltech;$(SolutionDir)\nclgl;$(SolutionDir)\ExternalLibs\GLEW\include;$(SolutionDir)\ExternalLibs\SOIL;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)\$(Configuration);$(SolutionDir)\ExternalLibs\GLEW\lib\$(Configuration);$(SolutionDir)\ExternalLibs\SOIL\$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -84,21 +84,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="GameTechTutorial1.h" />
-    <ClInclude Include="GameTechTutorial2.h" />
-    <ClInclude Include="GameTechTutorial3.h" />
-    <ClInclude Include="GameTechTutorial4.h" />
-    <ClInclude Include="GraphicsScene.h" />
-    <ClInclude Include="ObjectPlayer.h" />
-    <ClInclude Include="PhysicsScene1.h" />
-    <ClInclude Include="PhysicsScene2.h" />
-    <ClInclude Include="PhysicsScene3.h" />
-    <ClInclude Include="Utils.h" />
+    <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GraphicsScene.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="Utils.cpp" />
+    <ClInclude Include="NetworkEvalScene.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="NetworkEvalScene.cpp" />
+    <ClCompile Include="Network_Testbed.cpp" />
+    <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

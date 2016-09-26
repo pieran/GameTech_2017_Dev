@@ -71,8 +71,6 @@ protected:
 
 	HWND			windowHandle;
 
-	
-
 	static Window*		window;
 	static Keyboard*	keyboard;
 	static Mouse*		mouse;
