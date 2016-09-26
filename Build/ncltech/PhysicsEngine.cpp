@@ -5,7 +5,7 @@
 #include <nclgl\Window.h>
 
 
-#include "..\REMOVEME_Broadphase.h"
+#include "REMOVEME_Broadphase.h"
 
 void PhysicsEngine::SetDefaults()
 {
@@ -172,7 +172,10 @@ void PhysicsEngine::UpdatePhysicsObject(PhysicsObject* obj)
 //!!!!!!!!!!!!!!!!!!!!!!!!! REMOVE ME !!!!!!!!!!!!!!!!!!
 	if (!obj->awake)
 		return;
+
+	float newVelComb = (obj->m_LinearVelocity.LengthSquared() + obj->m_AngularVelocity.LengthSquared());
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 
 
 
@@ -198,9 +201,12 @@ void PhysicsEngine::UpdatePhysicsObject(PhysicsObject* obj)
 	obj->m_Orientation.Normalise();
 
 	//!!!!!!!!!!!!!!!!!!!!!!!!! REMOVE ME !!!!!!!!!!!!!!!!!!
-	obj->awake = (obj->m_LinearVelocity.LengthSquared() + obj->m_AngularVelocity.LengthSquared() > 0.001f);
+	obj->awake = (obj->m_LinearVelocity.LengthSquared() + obj->m_AngularVelocity.LengthSquared() > 0.001f)
+			|| abs(obj->oldVelComb - newVelComb) > 0.001f;
+	obj->oldVelComb = newVelComb;
+
 	REMOVEME_Broadphase::Instance()->UpdateObject(obj);
-	Object* gobj = obj->GetGameObject();
+	Object* gobj = obj->GetAssociatedObject();
 	if (gobj != NULL)
 	{
 		if (gobj->GetName() == "Cubicle")

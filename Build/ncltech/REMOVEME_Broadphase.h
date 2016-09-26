@@ -57,7 +57,7 @@ public:
 		if (shape != NULL)
 		{
 			float radius = 0.0f;
-			Object* scene_obj = obj->GetGameObject();
+			Object* scene_obj = obj->GetAssociatedObject();
 			if (scene_obj == NULL)
 			{
 				if (obj->GetCollisionShape() != NULL)

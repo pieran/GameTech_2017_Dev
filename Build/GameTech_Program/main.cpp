@@ -2,7 +2,7 @@
 #include <ncltech\PhysicsEngine.h>
 #include <ncltech\SceneManager.h>
 #include <ncltech\NCLDebug.h>
-#include <ncltech\..\PerfTimer.h>
+#include <ncltech\PerfTimer.h>
 
 #include "GameTechTutorial1.h"
 #include "GameTechTutorial2.h"

@@ -42,9 +42,10 @@ void ObjectMeshDragable::OnMouseDown(float dt, const Vector3& worldPos)
 {
 	m_LocalClickOffset = worldPos - this->m_WorldTransform.GetPositionVector();
 	this->m_Colour += m_MouseDownColOffset;
-
+	
 	if (this->HasPhysics())
 	{
+		this->Physics()->awake = true;
 		this->Physics()->SetAngularVelocity(Vector3(0.0f, 0.0f, 0.0f));
 		this->Physics()->SetLinearVelocity(Vector3(0.0f, 0.0f, 0.0f));
 	}
@@ -56,6 +57,7 @@ void ObjectMeshDragable::OnMouseMove(float dt, const Vector3& worldPos, const Ve
 
 	if (this->HasPhysics())
 	{
+		this->Physics()->awake = true;
 		this->Physics()->SetPosition(worldPos - m_LocalClickOffset);
 		this->Physics()->SetAngularVelocity(Vector3(0.0f, 0.0f, 0.0f));
 		this->Physics()->SetLinearVelocity(worldChange / dt * 0.5f);
@@ -70,6 +72,7 @@ void ObjectMeshDragable::OnMouseUp(float dt, const Vector3& worldPos)
 {
 	if (this->HasPhysics())
 	{
+		this->Physics()->awake = true;
 		this->Physics()->SetPosition(worldPos - m_LocalClickOffset);
 	}
 	else

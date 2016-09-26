@@ -62,6 +62,8 @@ public:
 
 	inline CollisionShape*		GetCollisionShape()			const 	{ return m_colShape; }
 
+	inline Object*				GetAssociatedObject()		const	{ return m_Parent; }
+
 	const Matrix4&				GetWorldSpaceTransform()    const;
 
 
@@ -94,6 +96,13 @@ public:
 	{
 		return (m_OnCollisionCallback) ? m_OnCollisionCallback(obj_a, obj_b) : true;
 	}
+
+
+	//!!!!!!!REMOVE ME!!!!!!!!!!!
+	void* broadphase_ptr = NULL;
+	bool awake = true;
+	float oldVelComb = 0.0f;
+	//!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 protected:
 	Object*				m_Parent;

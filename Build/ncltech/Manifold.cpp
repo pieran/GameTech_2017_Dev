@@ -27,7 +27,7 @@ void Manifold::ApplyImpulse(float solver_factor)
 }
 
 
-void Manifold::SolveContactPoint(Contact& c, float solver_factor)
+void Manifold::SolveContactPoint(ContactPoint& c, float solver_factor)
 {
 	if (m_NodeA->GetInverseMass() + m_NodeB->GetInverseMass() == 0.0f)
 		return;
@@ -53,12 +53,13 @@ void Manifold::SolveContactPoint(Contact& c, float solver_factor)
 		{
 			float distance_offset = c.collisionPenetration;
 			float baumgarte_scalar = 0.3f;
-			float baumgarte_slop = 0.00f;
+			float baumgarte_slop = 0.001f;
 			float penetration_slop = min(c.collisionPenetration + baumgarte_slop, 0.0f);
 			b = -(baumgarte_scalar / PhysicsEngine::Instance()->GetDeltaTime()) * penetration_slop;
 		}
 
-		float jn = -(Vector3::Dot(dv, normal) + c.elatisity_term + b) / constraintMass * solver_factor;
+		float b_real = max(b, c.elatisity_term + b * 0.2f);
+		float jn = -(Vector3::Dot(dv, normal) + b_real) / constraintMass * solver_factor;
 
 		//As this is run multiple times per frame,
 		// we need to clamp the total amount of movement to be positive

@@ -67,7 +67,7 @@ public:
 	PhysicsObject* NodeA() { return m_NodeA; }
 	PhysicsObject* NodeB() { return m_NodeB; }
 protected:
-	void SolveContactPoint(ContactPoint& c);
+	void SolveContactPoint(ContactPoint& c, float solver_factor);
 	void UpdateConstraint(ContactPoint& c);
 
 protected:
