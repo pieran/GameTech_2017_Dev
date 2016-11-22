@@ -164,70 +164,67 @@ void PhysicsEngine::UpdatePhysicsObjects()
 
 void PhysicsEngine::UpdatePhysicsObject(PhysicsObject* obj)
 {
-//!!!!!!!!!!!!!!!!!!!!!!!!! REMOVE ME !!!!!!!!!!!!!!!!!!
-	if (!obj->awake)
-		return;
-
-	float newVelComb = (obj->m_LinearVelocity.LengthSquared() + obj->m_AngularVelocity.LengthSquared());
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
-
-
-	//Semi-Implicit Euler Intergration
-	obj->m_LinearVelocity += obj->m_Force * obj->m_InvMass * m_UpdateTimestep;
-
 	//Apply Gravity
-	//	Technically this is (m_Gravity / invMass) * invMass * dt
-	//	hence the check for invMass being zero is required here even though it appears gravity is not affected by the objects mass
+	//	Technically gravity here is calculated by formula: ( m_Gravity / invMass * invMass * dt )
+	//	So even though the divide and multiply cancel out, we still need to handle the possibility of divide by zero.
 	if (obj->m_InvMass > 0.0f)
 		obj->m_LinearVelocity += m_Gravity * m_UpdateTimestep; 
 
+
+	//Semi-Implicit Euler Intergration
+	// - See "Update Position" below
+	obj->m_LinearVelocity += obj->m_Force * obj->m_InvMass * m_UpdateTimestep;
+
+
+	//Apply Velocity Damping
+	//	- This removes a tiny bit of energy from the simulation each update to stop slight calculation errors accumulating and adding force from nowhere.
+	//  - In it's present form this can be seen as a rough approximation of air resistance, albeit (wrongly?) making the assumption that all objects have the same surface area.
 	obj->m_LinearVelocity = obj->m_LinearVelocity * m_DampingFactor;
+
+
+	//Update Position
+	//  - Euler integration, works on the assumption that linearvelocity does not change over time (or changes so slightly it doesnt make a difference).
+	//	- In this scenario, gravity /will/ be increasing velocity over time. The in-accuracy of not taking into account of these changes over time can be
+	//  - visibly seen in tutorial 1.. and thus how better integration schemes lead to better approximations by taking into account of curvature.
 	obj->m_Position += obj->m_LinearVelocity * m_UpdateTimestep;
 
 
 	//Angular Rotation
-	Vector3 angluarAccel = obj->m_InvInertia * obj->m_Torque;
-	obj->m_AngularVelocity = obj->m_AngularVelocity + angluarAccel * m_UpdateTimestep;
+	//  - These are the exact same calculations as the three lines above, except for rotations rather than positions.
+	//		- Mass		-> Torque
+	//		- Velocity  -> Rotational Velocity
+	//		- Position  -> Orientation  
+	obj->m_AngularVelocity += obj->m_InvInertia * obj->m_Torque * m_UpdateTimestep;
+
+
+	//Apply Velocity Damping
 	obj->m_AngularVelocity = obj->m_AngularVelocity * m_DampingFactor;
 
-	obj->m_Orientation = obj->m_Orientation + obj->m_Orientation*(obj->m_AngularVelocity*m_UpdateTimestep*0.5f); //Quaternion equiv of the above position calculation
+
+	//Update Orientation
+	// - This is slightly different calculation due to the wierdness of quaternions. This, along with the normalise function to enforce it as a rotation, is the best way
+	// - to update the quaternion based on a angular velocity, and thats all you need to know. If you are interested in it's derivation, there is lots of stuff online about it.
+	obj->m_Orientation = obj->m_Orientation + obj->m_Orientation * ( obj->m_AngularVelocity * m_UpdateTimestep * 0.5f);
 	obj->m_Orientation.Normalise();
 
-	//!!!!!!!!!!!!!!!!!!!!!!!!! REMOVE ME !!!!!!!!!!!!!!!!!!
-	obj->awake = (obj->m_LinearVelocity.LengthSquared() + obj->m_AngularVelocity.LengthSquared() > 0.001f)
-			|| abs(obj->oldVelComb - newVelComb) > 0.001f;
-	obj->oldVelComb = newVelComb;
 
-	REMOVEME_Broadphase::Instance()->UpdateObject(obj);
-	Object* gobj = obj->GetAssociatedObject();
-	if (gobj != NULL)
-	{
-		if (gobj->GetName() == "Cubicle")
-		{
-			const Vector4& awake_colour = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
-			const Vector4& sleep_colour = Vector4(0.6f, 0.6f, 0.6f, 1.0f);
-			gobj->SetColour(obj->awake ? awake_colour : sleep_colour);
-		}
-	}
-	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-	obj->m_wsTransformInvalidated = true; //inform the physics object that it's world space transform is invalid
+	//Finally invalidate the world-transform matrix. 
+	// - The next time it is requested now, it will be rebuilt from scratch with the new position/orientation we set above.
+	obj->m_wsTransformInvalidated = true; 
 }
 
 void PhysicsEngine::BroadPhaseCollisions()
 {
 	m_BroadphaseCollisionPairs.clear();
 
-//!!!!!!!!!!!!!!!!!!!!!!!!! REMOVE ME !!!!!!!!!!!!!!!!!!
-	REMOVEME_Broadphase::Instance()->BuildCollisionPairs(m_BroadphaseCollisionPairs);
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	PhysicsObject *objA, *objB;
+	//	The broadphase needs to build a list of all potentially colliding objects in the world,
+	//	which then get accurately assesed in narrowphase. If this is too coarse then the system slows down with
+	//	the complexity of narrowphase collision checking, if this is too fine then collisions may be missed.
 
 
-	/*PhysicsObject *objA, *objB;
-
-	//This is a brute force broadphase, basically compiling a list to check every object against every other object
+	//	Brute force approach.
+	//  - Assumes every object could collide with every other object even if they are on other sides of the world.
 	for (size_t i = 0; i < m_PhysicsObjects.size() - 1; ++i)
 	{
 		for (size_t j = i + 1; j < m_PhysicsObjects.size(); ++j)
@@ -235,7 +232,7 @@ void PhysicsEngine::BroadPhaseCollisions()
 			objA = m_PhysicsObjects[i];
 			objB = m_PhysicsObjects[j];
 
-			//Check they both have collision shapes
+			//Check they both atleast have collision shapes
 			if (objA->GetCollisionShape() != NULL 
 				&& objB->GetCollisionShape() != NULL)
 			{
@@ -246,7 +243,7 @@ void PhysicsEngine::BroadPhaseCollisions()
 			}
 				
 		}
-	}*/
+	}
 }
 
 void PhysicsEngine::NarrowPhaseCollisions()
@@ -254,75 +251,47 @@ void PhysicsEngine::NarrowPhaseCollisions()
 	if (m_BroadphaseCollisionPairs.size() > 0)
 	{
 
+		CollisionData colData;				//Collision data to pass between detection and manifold generation stages.
+		CollisionDetectionSAT colDetect;	//Collision Detection Algorithm
 
-#pragma omp parallel
+		for (size_t i = 0; i < m_BroadphaseCollisionPairs.size(); ++i)
 		{
-			CollisionData colData;
-			CollisionDetectionSAT colDetect;
-			CollisionShape *shapeA, *shapeB;
+			CollisionPair& cp = m_BroadphaseCollisionPairs[i];
 
-			std::vector<Manifold*> private_man;
+			CollisionShape *shapeA = cp.objectA->GetCollisionShape();
+			CollisionShape *shapeB = cp.objectB->GetCollisionShape();
 
-#pragma omp for nowait schedule(static)
-			for (int i = 0; i < (int)m_BroadphaseCollisionPairs.size(); ++i)
+			colDetect.BeginNewPair(
+				cp.objectA,
+				cp.objectB,
+				cp.objectA->GetCollisionShape(),
+				cp.objectB->GetCollisionShape());
+
+
+			if (colDetect.AreColliding(&colData))
 			{
-				CollisionPair& cp = m_BroadphaseCollisionPairs[i];
-
-				shapeA = cp.objectA->GetCollisionShape();
-				shapeB = cp.objectB->GetCollisionShape();
-
-				colDetect.BeginNewPair(
-					cp.objectA,
-					cp.objectB,
-					cp.objectA->GetCollisionShape(),
-					cp.objectB->GetCollisionShape());
-
-
-				if (colDetect.AreColliding(&colData))
+				//Draw collision data to the window
+				if (m_DebugDrawFlags & DEBUHDRAW_FLAGS_COLLISIONNORMALS)
 				{
-					//Draw collision data to the window
-					if (m_DebugDrawFlags & DEBUHDRAW_FLAGS_COLLISIONNORMALS)
-					{
-						NCLDebug::DrawPointNDT(colData.pointOnPlane, 0.1f, Vector4(0.5f, 0.5f, 1.0f, 1.0f));
-						NCLDebug::DrawThickLineNDT(colData.pointOnPlane, colData.pointOnPlane - colData.normal * colData.penetration, 0.05f, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
-					}
+					NCLDebug::DrawPointNDT(colData.pointOnPlane, 0.1f, Vector4(0.5f, 0.5f, 1.0f, 1.0f));
+					NCLDebug::DrawThickLineNDT(colData.pointOnPlane, colData.pointOnPlane - colData.normal * colData.penetration, 0.05f, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+				}
 
-					//Check to see if any of the objects have collision callbacks that dont want the objects to physically collide
-					bool okA = cp.objectA->FireOnCollisionEvent(cp.objectA, cp.objectB);
-					bool okB = cp.objectB->FireOnCollisionEvent(cp.objectA, cp.objectB);
+				//Check to see if any of the objects have collision callbacks that dont want the objects to physically collide
+				bool okA = cp.objectA->FireOnCollisionEvent(cp.objectA, cp.objectB);
+				bool okB = cp.objectB->FireOnCollisionEvent(cp.objectA, cp.objectB);
 
-					if (okA && okB)
-					{
+				if (okA && okB)
+				{
 
-						//Build full collision manifold that will also handle the collision response between the two objects in the solver stage
-
-						//!!!!!!!!!!!!!!!!!!!!!!!!! REMOVE ME !!!!!!!!!!!!!!!!!!
-						cp.objectA->awake = cp.objectA->GetInverseMass() > 0.0001f;
-						cp.objectB->awake = cp.objectB->GetInverseMass() > 0.0001f;
-						//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-						Manifold* manifold = new Manifold();
-						manifold->Initiate(cp.objectA, cp.objectB);
-						colDetect.GenContactPoints(manifold);
-						private_man.push_back(manifold);
-						/*#pragma omp critical
-												{
-												m_Manifolds.push_back(manifold);
-												}*/
-					}
+					//Build full collision manifold that will also handle the collision response between the two objects in the solver stage
+					Manifold* manifold = new Manifold();
+					manifold->Initiate(cp.objectA, cp.objectB);
+					colDetect.GenContactPoints(manifold);
+					m_Manifolds.push_back(manifold);
 				}
 			}
-
-
-#pragma omp for schedule(static) ordered
-			for (int i = 0; i < omp_get_num_threads(); i++) {
-#pragma omp ordered
-				m_Manifolds.insert(m_Manifolds.end(), private_man.begin(), private_man.end());
-			}
-
-		} //End Parallel
-
-
+		}
 	}
 }
 
