@@ -303,14 +303,16 @@ void PhysicsEngine::SolveConstraints()
 		c->PreSolverStep(m_UpdateTimestep);
 	}
 	
-
-	for (Manifold* m : m_Manifolds)
+	for (int i = 0; i < SOLVER_ITERATIONS; ++i)
 	{
-		m->ApplyImpulse();
-	}
+		for (Manifold* m : m_Manifolds)
+		{
+			m->ApplyImpulse();
+		}
 
-	for (Constraint* c : m_Constraints)
-	{
-		c->ApplyImpulse();
+		for (Constraint* c : m_Constraints)
+		{
+			c->ApplyImpulse();
+		}
 	}
 }
