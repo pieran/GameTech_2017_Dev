@@ -59,7 +59,7 @@ public:
 	void AddContact(const Vector3& globalOnA, const Vector3& globalOnB, const Vector3& normal, const float& penetration);	
 
 	//Sequentially solves each contact constraint
-	void ApplyImpulse(float solver_factor);
+	void ApplyImpulse();
 	void PreSolverStep(float dt);
 	
 
@@ -70,7 +70,7 @@ public:
 	PhysicsObject* NodeA() { return m_NodeA; }
 	PhysicsObject* NodeB() { return m_NodeB; }
 protected:
-	void SolveContactPoint(ContactPoint& c, float solver_factor);
+	void SolveContactPoint(ContactPoint& c);
 	void UpdateConstraint(ContactPoint& c);
 
 protected:

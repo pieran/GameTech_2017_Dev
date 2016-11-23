@@ -266,14 +266,14 @@ void CollisionDetectionSAT::GenContactPoints(Manifold* out_manifold)
 	{
 		out_manifold->AddContact(
 			polygon1.front(),
-			polygon1.front() - m_BestColData.normal * m_BestColData.penetration,
+			polygon1.front() + m_BestColData.normal * m_BestColData.penetration,
 			m_BestColData.normal,
 			m_BestColData.penetration);
 	}
 	else if (polygon2.size() == 1)
 	{
 		out_manifold->AddContact(
-			polygon2.front() - m_BestColData.normal * m_BestColData.penetration,
+			polygon2.front() + m_BestColData.normal * m_BestColData.penetration,
 			polygon2.front(),
 			m_BestColData.normal,
 			m_BestColData.penetration);

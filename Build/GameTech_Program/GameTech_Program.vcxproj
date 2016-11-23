@@ -84,21 +84,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="GameTechTutorial1.h" />
-    <ClInclude Include="GameTechTutorial2.h" />
-    <ClInclude Include="GameTechTutorial3.h" />
-    <ClInclude Include="GameTechTutorial4.h" />
-    <ClInclude Include="GraphicsScene.h" />
     <ClInclude Include="ObjectPlayer.h" />
-    <ClInclude Include="PhysicsScene1.h" />
-    <ClInclude Include="PhysicsScene2.h" />
-    <ClInclude Include="PhysicsScene3.h" />
-    <ClInclude Include="Utils.h" />
+    <ClInclude Include="Phy2_Integration.h" />
+    <ClInclude Include="Phy3_Constraints.h" />
+    <ClInclude Include="Phy4_ColDetection.h" />
+    <ClInclude Include="Phy5_ColManifolds.h" />
+    <ClInclude Include="Phy6_ColResponse.h" />
+    <ClInclude Include="Phy7_Solver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GraphicsScene.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

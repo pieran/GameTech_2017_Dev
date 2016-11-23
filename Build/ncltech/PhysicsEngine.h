@@ -36,7 +36,7 @@ it is fine!
 #include <mutex>
 
 
-#define SOLVER_ITERATIONS 20
+#define SOLVER_ITERATIONS 50
 
 
 #define FALSE	0

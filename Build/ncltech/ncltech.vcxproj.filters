@@ -101,6 +101,9 @@
     <ClCompile Include="CollisionDetectionSAT.cpp">
       <Filter>src\Physics\CollisionDetection</Filter>
     </ClCompile>
+    <ClCompile Include="CommonUtils.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NCLDebug.h">
@@ -169,11 +172,11 @@
     <ClInclude Include="PerfTimer.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="REMOVEME_Broadphase.h">
-      <Filter>include\Physics</Filter>
+    <ClInclude Include="CommonUtils.h">
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="CollisionDetection.h">
-      <Filter>include</Filter>
+      <Filter>include\Physics</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

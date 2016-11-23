@@ -18,7 +18,7 @@ protected:
 		else
 		{
 			const float mv_speed = 5.f * dt;			//Meters per second
-			const float rot_speed = 90.f * dt;			//Degrees per second
+			const float rot_speed = 90.f * dt;			//Rotation degrees per second
 
 			if (Window::GetKeyboard()->KeyDown(KEYBOARD_UP))
 			{

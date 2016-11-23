@@ -27,17 +27,17 @@ void Manifold::Initiate(PhysicsObject* nodeA, PhysicsObject* nodeB)
 	m_NodeB = nodeB;
 }
 
-void Manifold::ApplyImpulse(float solver_factor)
+void Manifold::ApplyImpulse()
 {
 	float softness = (m_NodeA->GetInverseMass() + m_NodeB->GetInverseMass()) / m_Contacts.size();
 	for (ContactPoint& contact : m_Contacts)
 	{
-		SolveContactPoint(contact, solver_factor);
+		SolveContactPoint(contact);
 	}
 }
 
 
-void Manifold::SolveContactPoint(ContactPoint& c, float solver_factor)
+void Manifold::SolveContactPoint(ContactPoint& c)
 {
 	if (m_NodeA->GetInverseMass() + m_NodeB->GetInverseMass() == 0.0f)
 		return;
@@ -62,14 +62,14 @@ void Manifold::SolveContactPoint(ContactPoint& c, float solver_factor)
 		float b = 0.0f;
 		{
 			float distance_offset = c.collisionPenetration;
-			float baumgarte_scalar = 0.3f;
-			float baumgarte_slop = 0.001f;
+			float baumgarte_scalar = 0.1f;
+			float baumgarte_slop = 0.02f;
 			float penetration_slop = min(c.collisionPenetration + baumgarte_slop, 0.0f);
 			b = -(baumgarte_scalar / PhysicsEngine::Instance()->GetDeltaTime()) * penetration_slop;
 		}
 
 		float b_real = max(b, c.elatisity_term + b * 0.2f);
-		float jn = -(Vector3::Dot(dv, normal) + b_real) / constraintMass * solver_factor;
+		float jn = -(Vector3::Dot(dv, normal) + b_real) / constraintMass;
 
 		//As this is run multiple times per frame,
 		// we need to clamp the total amount of movement to be positive
@@ -77,14 +77,14 @@ void Manifold::SolveContactPoint(ContactPoint& c, float solver_factor)
 		// to compensate for collisions with other objects
 		float oldSumImpulseContact = c.sumImpulseContact;
 		c.sumImpulseContact = min(c.sumImpulseContact + jn, 0.0f);
-		float real_jn = c.sumImpulseContact - oldSumImpulseContact;
+		jn = c.sumImpulseContact - oldSumImpulseContact;
 
 
-		m_NodeA->SetLinearVelocity(m_NodeA->GetLinearVelocity() + normal*(real_jn*m_NodeA->GetInverseMass()));
-		m_NodeB->SetLinearVelocity(m_NodeB->GetLinearVelocity() - normal*(real_jn*m_NodeB->GetInverseMass()));
+		m_NodeA->SetLinearVelocity(m_NodeA->GetLinearVelocity() + normal*(jn * m_NodeA->GetInverseMass()));
+		m_NodeB->SetLinearVelocity(m_NodeB->GetLinearVelocity() - normal*(jn * m_NodeB->GetInverseMass()));
 
-		m_NodeA->SetAngularVelocity(m_NodeA->GetAngularVelocity() + m_NodeA->GetInverseInertia()* Vector3::Cross(r1, normal * real_jn));
-		m_NodeB->SetAngularVelocity(m_NodeB->GetAngularVelocity() - m_NodeB->GetInverseInertia()* Vector3::Cross(r2, normal * real_jn));
+		m_NodeA->SetAngularVelocity(m_NodeA->GetAngularVelocity() + m_NodeA->GetInverseInertia()* Vector3::Cross(r1, normal * jn));
+		m_NodeB->SetAngularVelocity(m_NodeB->GetAngularVelocity() - m_NodeB->GetInverseInertia()* Vector3::Cross(r2, normal * jn));
 	}
 
 
@@ -97,13 +97,13 @@ void Manifold::SolveContactPoint(ContactPoint& c, float solver_factor)
 		{
 			tangent = tangent * (1.0f / tangent_len);
 
-			float tangDiv = (m_NodeA->GetInverseMass() + m_NodeB->GetInverseMass()) +
+			float frictionalMass = (m_NodeA->GetInverseMass() + m_NodeB->GetInverseMass()) +
 				Vector3::Dot(tangent,
 				Vector3::Cross(m_NodeA->GetInverseInertia()* Vector3::Cross(r1, tangent), r1) +
 				Vector3::Cross(m_NodeB->GetInverseInertia()* Vector3::Cross(r2, tangent), r2));
 
 			float frictionCoef = (m_NodeA->GetFriction() * m_NodeB->GetFriction()) / m_Contacts.size();
-			float jt = -1 * frictionCoef * Vector3::Dot(dv, tangent) / tangDiv;
+			float jt = -1 * frictionCoef * Vector3::Dot(dv, tangent) / frictionalMass;
 
 			//Stop Friction from ever being more than frictionCoef * normal resolution impulse
 			//
@@ -112,14 +112,14 @@ void Manifold::SolveContactPoint(ContactPoint& c, float solver_factor)
 			float oldImpulseFriction = c.sumImpulseFriction.Length();
 			c.sumImpulseFriction = c.sumImpulseFriction + tangent * jt;
 			float diff = abs(c.sumImpulseContact) / c.sumImpulseFriction.Length() * frictionCoef;
-			float real_jt = jt * min(diff, 1.0f);
+			jt = jt * min(diff, 1.0f);
 
 
-			m_NodeA->SetLinearVelocity(m_NodeA->GetLinearVelocity() + tangent*(real_jt*m_NodeA->GetInverseMass()));
-			m_NodeB->SetLinearVelocity(m_NodeB->GetLinearVelocity() - tangent*(real_jt*m_NodeB->GetInverseMass()));
+			m_NodeA->SetLinearVelocity(m_NodeA->GetLinearVelocity() + tangent*(jt*m_NodeA->GetInverseMass()));
+			m_NodeB->SetLinearVelocity(m_NodeB->GetLinearVelocity() - tangent*(jt*m_NodeB->GetInverseMass()));
 
-			m_NodeA->SetAngularVelocity(m_NodeA->GetAngularVelocity() + m_NodeA->GetInverseInertia()* Vector3::Cross(r1, tangent * real_jt));
-			m_NodeB->SetAngularVelocity(m_NodeB->GetAngularVelocity() - m_NodeB->GetInverseInertia()* Vector3::Cross(r2, tangent * real_jt));
+			m_NodeA->SetAngularVelocity(m_NodeA->GetAngularVelocity() + m_NodeA->GetInverseInertia()* Vector3::Cross(r1, tangent * jt));
+			m_NodeB->SetAngularVelocity(m_NodeB->GetAngularVelocity() - m_NodeB->GetInverseInertia()* Vector3::Cross(r2, tangent * jt));
 		}
 	}
 }
@@ -153,11 +153,11 @@ void Manifold::UpdateConstraint(ContactPoint& contact)
 			);
 
 		//Elasticity slop here is used to make objects come to rest quicker. 
-		// It works out if the elastic term is less than a given value (0.5 m/s here)
+		// It works out if the elastic term is less than a given value (0.2 m/s here)
 		// and if it is, then it is too small to see and ignores the elasticity calculation.
 		// Most noticable when you have a stack of objects, without this they will jitter alot.
 		const float elasticity_slop = 0.2f;
-		if (elatisity_term < elatisity_term)
+		if (elatisity_term < elasticity_slop)
 			elatisity_term = 0.0f;
 
 		contact.elatisity_term = elatisity_term;

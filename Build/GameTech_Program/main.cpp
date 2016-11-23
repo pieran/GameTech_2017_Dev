@@ -4,14 +4,12 @@
 #include <ncltech\NCLDebug.h>
 #include <ncltech\PerfTimer.h>
 
-#include "GameTechTutorial1.h"
-#include "GameTechTutorial2.h"
-#include "GameTechTutorial3.h"
-#include "GameTechTutorial4.h"
-#include "GraphicsScene.h"
-#include "PhysicsScene1.h"
-#include "PhysicsScene2.h"
-#include "PhysicsScene3.h"
+#include "Phy2_Integration.h"
+#include "Phy3_Constraints.h"
+#include "Phy4_ColDetection.h"
+#include "Phy5_ColManifolds.h"
+#include "Phy6_ColResponse.h"
+#include "Phy7_Solver.h"
 
 const Vector4 status_colour = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 const Vector4 status_colour_header = Vector4(0.8f, 0.9f, 1.0f, 1.0f);
@@ -48,16 +46,12 @@ void Initialize()
 		Quit(true, "Renderer failed to initialise!");	
 
 	//Enqueue All Scenes
-	SceneManager::Instance()->EnqueueScene(new GraphicsScene("Graphics #1 - Rendering Test"));
-
-	SceneManager::Instance()->EnqueueScene(new PhysicsScene1("Physics #1 - Stacking Cubes"));
-	SceneManager::Instance()->EnqueueScene(new PhysicsScene2("Physics #2 - Stacking Balls"));
-	SceneManager::Instance()->EnqueueScene(new PhysicsScene3("Physics #3 - Constraint Carousel"));
-
-	SceneManager::Instance()->EnqueueScene(new GameTechTutorial1("Physics Tut #1 - Integration"));
-	SceneManager::Instance()->EnqueueScene(new GameTechTutorial2("Physics Tut #2 - Constraints"));
-	SceneManager::Instance()->EnqueueScene(new GameTechTutorial3("Physics Tut #3 - Collision Detection"));
-	SceneManager::Instance()->EnqueueScene(new GameTechTutorial4("Physics Tut #4 - Collision Resolution"));
+	SceneManager::Instance()->EnqueueScene(new Phy2_Integration("Physics Tut #2 - Integration"));
+	SceneManager::Instance()->EnqueueScene(new Phy3_Constraints("Physics Tut #3 - Distance Constraints"));
+	SceneManager::Instance()->EnqueueScene(new Phy4_ColDetection("Physics Tut #4 - Collision Detection"));
+	SceneManager::Instance()->EnqueueScene(new Phy5_ColManifolds("Physics Tut #5 - Collision Manifolds"));
+	SceneManager::Instance()->EnqueueScene(new Phy6_ColResponse("Physics Tut #6 - Collision Response"));
+	SceneManager::Instance()->EnqueueScene(new Phy7_Solver("Physics Tut #7 - Global Solver"));
 }
 
 void PrintStatusEntries()

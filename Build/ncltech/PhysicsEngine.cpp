@@ -5,7 +5,6 @@
 #include <nclgl\Window.h>
 #include <omp.h>
 
-#include "REMOVEME_Broadphase.h"
 
 void PhysicsEngine::SetDefaults()
 {
@@ -15,11 +14,6 @@ void PhysicsEngine::SetDefaults()
 	m_UpdateAccum = 0.0f;
 	m_Gravity = Vector3(0.0f, -9.81f, 0.0f);
 	m_DampingFactor = 0.999f;
-
-
-	//!!!!!!!!!!!!!!!!!!!!!!!!! REMOVE ME !!!!!!!!!!!!!!!!!!
-	REMOVEME_Broadphase::Instance()->ClearAll();
-	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }
 
 PhysicsEngine::PhysicsEngine()
@@ -309,19 +303,14 @@ void PhysicsEngine::SolveConstraints()
 		c->PreSolverStep(m_UpdateTimestep);
 	}
 	
-	float factor = 1.0f;
-	for (size_t i = 0; i < SOLVER_ITERATIONS; ++i)
+
+	for (Manifold* m : m_Manifolds)
 	{
-		for (Manifold* m : m_Manifolds)
-		{
-			m->ApplyImpulse(factor);
-		}
+		m->ApplyImpulse();
+	}
 
-		for (Constraint* c : m_Constraints)
-		{
-			c->ApplyImpulse();
-		}
-
-		factor *= 0.9f;
+	for (Constraint* c : m_Constraints)
+	{
+		c->ApplyImpulse();
 	}
 }

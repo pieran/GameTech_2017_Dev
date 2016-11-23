@@ -76,6 +76,7 @@
   <ItemGroup>
     <ClCompile Include="CollisionDetectionSAT.cpp" />
     <ClCompile Include="CommonMeshes.cpp" />
+    <ClCompile Include="CommonUtils.cpp" />
     <ClCompile Include="Constraint.cpp" />
     <ClCompile Include="CuboidCollisionShape.cpp" />
     <ClCompile Include="ObjectMeshDragable.cpp" />
@@ -98,6 +99,7 @@
     <ClInclude Include="CollisionDetection.h" />
     <ClInclude Include="CollisionShape.h" />
     <ClInclude Include="CommonMeshes.h" />
+    <ClInclude Include="CommonUtils.h" />
     <ClInclude Include="Constraint.h" />
     <ClInclude Include="CuboidCollisionShape.h" />
     <ClInclude Include="DistanceConstraint.h" />
@@ -117,7 +119,6 @@
     <ClInclude Include="SphereCollisionShape.h" />
     <ClInclude Include="TSingleton.h" />
     <ClInclude Include="PerfTimer.h" />
-    <ClInclude Include="REMOVEME_Broadphase.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

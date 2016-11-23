@@ -86,9 +86,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="NetworkEvalScene.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="stdafx.h" />

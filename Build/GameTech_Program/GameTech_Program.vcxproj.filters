@@ -12,51 +12,33 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="src\Scenes">
-      <UniqueIdentifier>{f9f512ed-0ef6-4e00-930b-a68c1ad9a11b}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ObjectPlayer.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="Utils.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="GameTechTutorial1.h">
+    <ClInclude Include="Phy2_Integration.h">
       <Filter>include\Scenes</Filter>
     </ClInclude>
-    <ClInclude Include="GameTechTutorial2.h">
+    <ClInclude Include="Phy3_Constraints.h">
       <Filter>include\Scenes</Filter>
     </ClInclude>
-    <ClInclude Include="GameTechTutorial3.h">
+    <ClInclude Include="Phy4_ColDetection.h">
       <Filter>include\Scenes</Filter>
     </ClInclude>
-    <ClInclude Include="GameTechTutorial4.h">
+    <ClInclude Include="Phy5_ColManifolds.h">
       <Filter>include\Scenes</Filter>
     </ClInclude>
-    <ClInclude Include="PhysicsScene1.h">
+    <ClInclude Include="Phy6_ColResponse.h">
       <Filter>include\Scenes</Filter>
     </ClInclude>
-    <ClInclude Include="PhysicsScene2.h">
-      <Filter>include\Scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="PhysicsScene3.h">
-      <Filter>include\Scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicsScene.h">
+    <ClInclude Include="Phy7_Solver.h">
       <Filter>include\Scenes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="Utils.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicsScene.cpp">
-      <Filter>src\Scenes</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
