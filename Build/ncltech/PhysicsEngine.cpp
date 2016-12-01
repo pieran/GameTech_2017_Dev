@@ -23,18 +23,7 @@ PhysicsEngine::PhysicsEngine()
 
 PhysicsEngine::~PhysicsEngine()
 {
-	for (PhysicsObject* obj : m_PhysicsObjects)
-	{
-		delete obj;
-	}
-	m_PhysicsObjects.clear();
-
-	for (Constraint* c : m_Constraints)
-	{
-		delete c;
-	}
-	m_Constraints.clear();
-	m_Manifolds.clear();
+	RemoveAllPhysicsObjects();
 }
 
 void PhysicsEngine::AddPhysicsObject(PhysicsObject* obj)
@@ -44,8 +33,10 @@ void PhysicsEngine::AddPhysicsObject(PhysicsObject* obj)
 
 void PhysicsEngine::RemovePhysicsObject(PhysicsObject* obj)
 {
+	//Lookup the object in question
 	auto found_loc = std::find(m_PhysicsObjects.begin(), m_PhysicsObjects.end(), obj);
 
+	//If found, remove it from the list
 	if (found_loc != m_PhysicsObjects.end())
 	{
 		m_PhysicsObjects.erase(found_loc);
@@ -54,28 +45,31 @@ void PhysicsEngine::RemovePhysicsObject(PhysicsObject* obj)
 
 void PhysicsEngine::RemoveAllPhysicsObjects()
 {
-	for (PhysicsObject* obj : m_PhysicsObjects)
-	{
-		if (obj != NULL)
-		{
-			if (obj->m_Parent != NULL) obj->m_Parent->m_PhysicsObject = NULL;
-			delete obj;
-		}
-	}
-	m_PhysicsObjects.clear();
-
-	for (Constraint* c : m_Constraints)
+	//Delete and remove all constraints/collision manifolds
+	for (Constraint* c : m_vpConstraints)
 	{
 		delete c;
 	}
-	m_Constraints.clear();
+	m_vpConstraints.clear();
 
-	for (Manifold* m : m_Manifolds)
+	for (Manifold* m : m_vpManifolds)
 	{
 		delete m;
 	}
-	m_Manifolds.clear();
+	m_vpManifolds.clear();
+
+
+	//Delete and remove all physics objects
+	// - we also need to inform the (possible) associated game-object
+	//   that the physics object no longer exists
+	for (PhysicsObject* obj : m_PhysicsObjects)
+	{
+		if (obj->m_pParent != NULL) obj->m_pParent->m_pPhysicsObject = NULL;
+		delete obj;
+	}
+	m_PhysicsObjects.clear();
 }
+
 
 void PhysicsEngine::Update(float deltaTime)
 {
@@ -93,6 +87,8 @@ void PhysicsEngine::Update(float deltaTime)
 		if (m_UpdateAccum >= m_UpdateTimestep)
 		{
 			NCLERROR("Physics too slow to run in real time!");
+			//Drop Time in the hope that it can continue to run in real-time
+			m_UpdateAccum = 0.0f;
 		}
 	}
 }
@@ -100,11 +96,11 @@ void PhysicsEngine::Update(float deltaTime)
 
 void PhysicsEngine::UpdatePhysics()
 {
-	for (Manifold* m : m_Manifolds)
+	for (Manifold* m : m_vpManifolds)
 	{
 		delete m;
 	}
-	m_Manifolds.clear();
+	m_vpManifolds.clear();
 
 	//Check for collisions
 	BroadPhaseCollisions();
@@ -114,28 +110,178 @@ void PhysicsEngine::UpdatePhysics()
 	SolveConstraints();
 
 	//Update movement
-	UpdatePhysicsObjects();
+	for (PhysicsObject* obj : m_PhysicsObjects)
+	{
+		UpdatePhysicsObject(obj);
+	}
 }
+
+
+void PhysicsEngine::SolveConstraints()
+{
+
+	//Optional step to allow constraints to 
+	// precompute values based off current velocities 
+	// before they are updated in the main loop below.
+	for (Manifold* m : m_vpManifolds)		m->PreSolverStep(m_UpdateTimestep);
+	for (Constraint* c : m_vpConstraints)	c->PreSolverStep(m_UpdateTimestep);
+
+	for (int i = 0; i < SOLVER_ITERATIONS; ++i)
+	{
+		// Solve all Constraints and Collision Manifolds
+		for (Manifold* m : m_vpManifolds)		m->ApplyImpulse();
+		for (Constraint* c : m_vpConstraints)	c->ApplyImpulse();
+	}
+
+	//for (Manifold* m : m_vpManifolds) m->ApplyFriction();
+}
+
+
+void PhysicsEngine::UpdatePhysicsObject(PhysicsObject* obj)
+{
+	//Mid-Point Method (RK2)
+	Vector3 lacc = obj->m_Force * obj->m_InvMass;
+	if (obj->m_InvMass > 0.f) lacc += m_Gravity;
+	
+	obj->m_Position += (obj->m_LinearVelocity + lacc * m_UpdateTimestep * 0.5f) * m_UpdateTimestep;
+	obj->m_LinearVelocity += lacc * m_UpdateTimestep;
+	obj->m_LinearVelocity = obj->m_LinearVelocity * m_DampingFactor;
+
+	Vector3 racc = obj->m_InvInertia * obj->m_Torque;
+	obj->m_Orientation = obj->m_Orientation + obj->m_Orientation * ((obj->m_AngularVelocity + racc * m_UpdateTimestep * 0.5f) * m_UpdateTimestep * 0.5f);
+	obj->m_AngularVelocity += racc * m_UpdateTimestep;
+
+	obj->m_Orientation.Normalise();
+	obj->m_wsTransformInvalidated = true;
+}
+
+
+void PhysicsEngine::BroadPhaseCollisions()
+{
+	m_BroadphaseCollisionPairs.clear();
+
+	PhysicsObject *m_pObj1, *m_pObj2;
+	//	The broadphase needs to build a list of all potentially colliding objects in the world,
+	//	which then get accurately assesed in narrowphase. If this is too coarse then the system slows down with
+	//	the complexity of narrowphase collision checking, if this is too fine then collisions may be missed.
+
+
+	//	Brute force approach.
+	//  - For every object A, assume it could collide with every other object.. 
+	//    even if they are on the opposite sides of the world.
+	if (m_PhysicsObjects.size() > 0)
+	{
+		for (size_t i = 0; i < m_PhysicsObjects.size() - 1; ++i)
+		{
+			for (size_t j = i + 1; j < m_PhysicsObjects.size(); ++j)
+			{
+				m_pObj1 = m_PhysicsObjects[i];
+				m_pObj2 = m_PhysicsObjects[j];
+
+				//Check they both atleast have collision shapes
+				if (m_pObj1->GetCollisionShape() != NULL
+					&& m_pObj2->GetCollisionShape() != NULL)
+				{
+
+					float radii = m_pObj1->GetCollisionShape()->GetRadius() + m_pObj2->GetCollisionShape()->GetRadius();
+					float len_sq = (m_pObj1->GetPosition() - m_pObj2->GetPosition()).LengthSquared();
+					if (radii * radii >= len_sq)
+					{
+						CollisionPair cp;
+						cp.pObjectA = m_pObj1;
+						cp.pObjectB = m_pObj2;
+						m_BroadphaseCollisionPairs.push_back(cp);
+					}
+				}
+
+			}
+		}
+	}
+}
+
+
+void PhysicsEngine::NarrowPhaseCollisions()
+{
+	if (m_BroadphaseCollisionPairs.size() > 0)
+	{
+		//Collision data to pass between detection and manifold generation stages.
+		CollisionData colData;				
+
+		//Collision Detection Algorithm to use
+		CollisionDetectionSAT colDetect;	
+
+		// Iterate over all possible collision pairs and perform accurate collision detection
+		for (size_t i = 0; i < m_BroadphaseCollisionPairs.size(); ++i)
+		{
+			CollisionPair& cp = m_BroadphaseCollisionPairs[i];
+
+			CollisionShape *shapeA = cp.pObjectA->GetCollisionShape();
+			CollisionShape *shapeB = cp.pObjectB->GetCollisionShape();
+
+			colDetect.BeginNewPair(
+				cp.pObjectA,
+				cp.pObjectB,
+				cp.pObjectA->GetCollisionShape(),
+				cp.pObjectB->GetCollisionShape());
+
+			//--TUTORIAL 4 CODE--
+			// Detects if the objects are colliding - Seperating Axis Theorem
+			if (colDetect.AreColliding(&colData))
+			{
+				//Draw collision data to the window if requested
+				// - Have to do this here as colData is only temporary. 
+				if (m_DebugDrawFlags & DEBUGDRAW_FLAGS_COLLISIONNORMALS)
+				{
+					NCLDebug::DrawPointNDT(colData._pointOnPlane, 0.1f, Vector4(0.5f, 0.5f, 1.0f, 1.0f));
+					NCLDebug::DrawThickLineNDT(colData._pointOnPlane, colData._pointOnPlane - colData._normal * colData._penetration, 0.05f, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+				}
+
+				//Check to see if any of the objects have collision callbacks that dont want the objects to physically collide
+				bool okA = cp.pObjectA->FireOnCollisionEvent(cp.pObjectA, cp.pObjectB);
+				bool okB = cp.pObjectB->FireOnCollisionEvent(cp.pObjectB, cp.pObjectA);
+
+				if (okA && okB)
+				{
+					//-- TUTORIAL 5 CODE --
+					// Build full collision manifold that will also handle the collision response between the two objects in the solver stage
+					Manifold* manifold = new Manifold();
+					manifold->Initiate(cp.pObjectA, cp.pObjectB);
+
+					// Construct contact points that form the perimeter of the collision manifold
+					colDetect.GenContactPoints(manifold);
+
+					// Add to list of manifolds that need solving
+					m_vpManifolds.push_back(manifold);
+				}
+			}
+		}
+
+	}
+}
+
 
 void PhysicsEngine::DebugRender()
 {
-	if (m_DebugDrawFlags & DEBUHDRAW_FLAGS_MANIFOLD)
+	// Draw all collision manifolds
+	if (m_DebugDrawFlags & DEBUGDRAW_FLAGS_MANIFOLD)
 	{
-		for (Manifold* m : m_Manifolds)
+		for (Manifold* m : m_vpManifolds)
 		{
 			m->DebugDraw();
 		}
 	}
 
-	if (m_DebugDrawFlags & DEBUHDRAW_FLAGS_CONSTRAINT)
+	// Draw all constraints
+	if (m_DebugDrawFlags & DEBUGDRAW_FLAGS_CONSTRAINT)
 	{
-		for (Constraint* c : m_Constraints)
+		for (Constraint* c : m_vpConstraints)
 		{
 			c->DebugDraw();
 		}
 	}
 
-	if (m_DebugDrawFlags & DEBUHDRAW_FLAGS_COLLISIONVOLUMES)
+	// Draw all associated collision shapes
+	if (m_DebugDrawFlags & DEBUGDRAW_FLAGS_COLLISIONVOLUMES)
 	{
 		for (PhysicsObject* obj : m_PhysicsObjects)
 		{
@@ -143,176 +289,6 @@ void PhysicsEngine::DebugRender()
 			{
 				obj->GetCollisionShape()->DebugDraw(obj);
 			}
-		}
-	}
-}
-
-
-void PhysicsEngine::UpdatePhysicsObjects()
-{
-	for (PhysicsObject* obj : m_PhysicsObjects)
-	{
-		UpdatePhysicsObject(obj);
-	}
-}
-
-void PhysicsEngine::UpdatePhysicsObject(PhysicsObject* obj)
-{
-	//Apply Gravity
-	//	Technically gravity here is calculated by formula: ( m_Gravity / invMass * invMass * dt )
-	//	So even though the divide and multiply cancel out, we still need to handle the possibility of divide by zero.
-	if (obj->m_InvMass > 0.0f)
-		obj->m_LinearVelocity += m_Gravity * m_UpdateTimestep; 
-
-
-	//Semi-Implicit Euler Intergration
-	// - See "Update Position" below
-	obj->m_LinearVelocity += obj->m_Force * obj->m_InvMass * m_UpdateTimestep;
-
-
-	//Apply Velocity Damping
-	//	- This removes a tiny bit of energy from the simulation each update to stop slight calculation errors accumulating and adding force from nowhere.
-	//  - In it's present form this can be seen as a rough approximation of air resistance, albeit (wrongly?) making the assumption that all objects have the same surface area.
-	obj->m_LinearVelocity = obj->m_LinearVelocity * m_DampingFactor;
-
-
-	//Update Position
-	//  - Euler integration, works on the assumption that linearvelocity does not change over time (or changes so slightly it doesnt make a difference).
-	//	- In this scenario, gravity /will/ be increasing velocity over time. The in-accuracy of not taking into account of these changes over time can be
-	//  - visibly seen in tutorial 1.. and thus how better integration schemes lead to better approximations by taking into account of curvature.
-	obj->m_Position += obj->m_LinearVelocity * m_UpdateTimestep;
-
-
-	//Angular Rotation
-	//  - These are the exact same calculations as the three lines above, except for rotations rather than positions.
-	//		- Mass		-> Torque
-	//		- Velocity  -> Rotational Velocity
-	//		- Position  -> Orientation  
-	obj->m_AngularVelocity += obj->m_InvInertia * obj->m_Torque * m_UpdateTimestep;
-
-
-	//Apply Velocity Damping
-	obj->m_AngularVelocity = obj->m_AngularVelocity * m_DampingFactor;
-
-
-	//Update Orientation
-	// - This is slightly different calculation due to the wierdness of quaternions. This, along with the normalise function to enforce it as a rotation, is the best way
-	// - to update the quaternion based on a angular velocity, and thats all you need to know. If you are interested in it's derivation, there is lots of stuff online about it.
-	obj->m_Orientation = obj->m_Orientation + obj->m_Orientation * ( obj->m_AngularVelocity * m_UpdateTimestep * 0.5f);
-	obj->m_Orientation.Normalise();
-
-
-	//Finally invalidate the world-transform matrix. 
-	// - The next time it is requested now, it will be rebuilt from scratch with the new position/orientation we set above.
-	obj->m_wsTransformInvalidated = true; 
-}
-
-void PhysicsEngine::BroadPhaseCollisions()
-{
-	m_BroadphaseCollisionPairs.clear();
-
-	PhysicsObject *objA, *objB;
-	//	The broadphase needs to build a list of all potentially colliding objects in the world,
-	//	which then get accurately assesed in narrowphase. If this is too coarse then the system slows down with
-	//	the complexity of narrowphase collision checking, if this is too fine then collisions may be missed.
-
-
-	//	Brute force approach.
-	//  - Assumes every object could collide with every other object even if they are on other sides of the world.
-	for (size_t i = 0; i < m_PhysicsObjects.size() - 1; ++i)
-	{
-		for (size_t j = i + 1; j < m_PhysicsObjects.size(); ++j)
-		{
-			objA = m_PhysicsObjects[i];
-			objB = m_PhysicsObjects[j];
-
-			//Check they both atleast have collision shapes
-			if (objA->GetCollisionShape() != NULL 
-				&& objB->GetCollisionShape() != NULL)
-			{
-				CollisionPair cp;
-				cp.objectA = objA;
-				cp.objectB = objB;
-				m_BroadphaseCollisionPairs.push_back(cp);
-			}
-				
-		}
-	}
-}
-
-void PhysicsEngine::NarrowPhaseCollisions()
-{
-	if (m_BroadphaseCollisionPairs.size() > 0)
-	{
-
-		CollisionData colData;				//Collision data to pass between detection and manifold generation stages.
-		CollisionDetectionSAT colDetect;	//Collision Detection Algorithm
-
-		for (size_t i = 0; i < m_BroadphaseCollisionPairs.size(); ++i)
-		{
-			CollisionPair& cp = m_BroadphaseCollisionPairs[i];
-
-			CollisionShape *shapeA = cp.objectA->GetCollisionShape();
-			CollisionShape *shapeB = cp.objectB->GetCollisionShape();
-
-			colDetect.BeginNewPair(
-				cp.objectA,
-				cp.objectB,
-				cp.objectA->GetCollisionShape(),
-				cp.objectB->GetCollisionShape());
-
-
-			if (colDetect.AreColliding(&colData))
-			{
-				//Draw collision data to the window
-				if (m_DebugDrawFlags & DEBUHDRAW_FLAGS_COLLISIONNORMALS)
-				{
-					NCLDebug::DrawPointNDT(colData.pointOnPlane, 0.1f, Vector4(0.5f, 0.5f, 1.0f, 1.0f));
-					NCLDebug::DrawThickLineNDT(colData.pointOnPlane, colData.pointOnPlane - colData.normal * colData.penetration, 0.05f, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
-				}
-
-				//Check to see if any of the objects have collision callbacks that dont want the objects to physically collide
-				bool okA = cp.objectA->FireOnCollisionEvent(cp.objectA, cp.objectB);
-				bool okB = cp.objectB->FireOnCollisionEvent(cp.objectA, cp.objectB);
-
-				if (okA && okB)
-				{
-
-					//Build full collision manifold that will also handle the collision response between the two objects in the solver stage
-					Manifold* manifold = new Manifold();
-					manifold->Initiate(cp.objectA, cp.objectB);
-					colDetect.GenContactPoints(manifold);
-					m_Manifolds.push_back(manifold);
-				}
-			}
-		}
-	}
-}
-
-
-
-void PhysicsEngine::SolveConstraints()
-{
-	for (Manifold* m : m_Manifolds)
-	{
-		m->PreSolverStep(m_UpdateTimestep);
-	}
-
-	for (Constraint* c : m_Constraints)
-	{
-		c->PreSolverStep(m_UpdateTimestep);
-	}
-	
-	for (int i = 0; i < SOLVER_ITERATIONS; ++i)
-	{
-		for (Manifold* m : m_Manifolds)
-		{
-			m->ApplyImpulse();
-		}
-
-		for (Constraint* c : m_Constraints)
-		{
-			c->ApplyImpulse();
 		}
 	}
 }

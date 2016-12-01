@@ -18,6 +18,7 @@ CuboidCollisionShape::CuboidCollisionShape()
 CuboidCollisionShape::CuboidCollisionShape(const Vector3& halfdims)
 {
 	m_CuboidHalfDimensions = halfdims;
+	m_Radius = m_CuboidHalfDimensions.Length();
 
 	if (m_CubeHull.GetNumVertices() == 0)
 	{
@@ -77,18 +78,24 @@ void CuboidCollisionShape::GetMinMaxVertexOnAxis(
 	Vector3* out_min,
 	Vector3* out_max) const
 {
+	// Build World Transform
 	Matrix4 wsTransform = currentObject->GetWorldSpaceTransform() * Matrix4::Scale(m_CuboidHalfDimensions);
 
+	// Convert world space axis into model space (Axis Aligned Cuboid)
 	Matrix3 invNormalMatrix = Matrix3::Transpose(Matrix3(wsTransform));
 	Vector3 local_axis = invNormalMatrix * axis;
-	//local_axis.Normalise();
+	local_axis.Normalise();
 
+	// Get closest and furthest vertex id's
 	int vMin, vMax;
 	m_CubeHull.GetMinMaxVerticesInAxis(local_axis, &vMin, &vMax);
 
+	// Return closest and furthest vertices in world-space
 	if (out_min) *out_min = wsTransform * m_CubeHull.GetVertex(vMin).pos;
 	if (out_max) *out_max = wsTransform * m_CubeHull.GetVertex(vMax).pos;
 }
+
+
 
 void CuboidCollisionShape::GetIncidentReferencePolygon(
 	const PhysicsObject* currentObject,
@@ -97,24 +104,32 @@ void CuboidCollisionShape::GetIncidentReferencePolygon(
 	Vector3* out_normal,
 	std::vector<Plane>* out_adjacent_planes) const
 {
+	//Get the world-space transform
 	Matrix4 wsTransform = currentObject->GetWorldSpaceTransform() * Matrix4::Scale(m_CuboidHalfDimensions);
 
-	Matrix3 invNormalMatrix = Matrix3::Inverse(Matrix3(wsTransform));
-	Matrix3 normalMatrix = Matrix3::Transpose(invNormalMatrix);
+	//Get normal and inverse-normal matrices to transfom the collision axis to and from modelspace
+	Matrix3 invNormalMatrix = Matrix3::Transpose(Matrix3(wsTransform));
+	Matrix3 normalMatrix = Matrix3::Inverse(invNormalMatrix);
 	
+
 	Vector3 local_axis = invNormalMatrix * axis;
 
-	int minVertex, maxVertex;
-	m_CubeHull.GetMinMaxVerticesInAxis(local_axis, &minVertex, &maxVertex);
 
+	//Get the furthest vertex along axis - this will be part of the further face
+	int undefined, maxVertex;
+	m_CubeHull.GetMinMaxVerticesInAxis(local_axis, &undefined, &maxVertex);
 	const HullVertex& vert = m_CubeHull.GetVertex(maxVertex);
 
+
+	//Compute which face (that contains the furthest vertex above)
+	// is the furthest along the given axis. This is defined by
+	// it's normal being closest to parallel with the collision axis.
 	const HullFace* best_face = 0;
 	float best_correlation = -FLT_MAX;
 	for (int faceIdx : vert.enclosing_faces)
 	{
 		const HullFace* face = &m_CubeHull.GetFace(faceIdx);
-		float temp_correlation = Vector3::Dot(local_axis, face->normal);
+		float temp_correlation = Vector3::Dot(local_axis, face->_normal);
 		if (temp_correlation > best_correlation)
 		{
 			best_correlation = temp_correlation;
@@ -122,12 +137,15 @@ void CuboidCollisionShape::GetIncidentReferencePolygon(
 		}
 	}
 
+
+	// Output face normal
 	if (out_normal)
 	{
-		*out_normal = normalMatrix * best_face->normal;
+		*out_normal = normalMatrix * best_face->_normal;
 		(*out_normal).Normalise();
 	}
 
+	// Output face vertices (transformed back into world-space)
 	if (out_face)
 	{
 		for (int vertIdx : best_face->vert_ids)
@@ -137,17 +155,30 @@ void CuboidCollisionShape::GetIncidentReferencePolygon(
 		}
 	}
 
+	
+	// Now, we need to define a set of planes that will clip any 3d geometry down to fit inside 
+	// the shape. This results in us forming list of clip planes from each of the
+	// adjacent faces along with the reference face itself.
 	if (out_adjacent_planes)
 	{
-		//Add the reference face itself to the list of adjacent planes
 		Vector3 wsPointOnPlane = wsTransform * m_CubeHull.GetVertex(m_CubeHull.GetEdge(best_face->edge_ids[0]).vStart).pos;
-		Vector3 planeNrml = -(normalMatrix * best_face->normal);
-		planeNrml.Normalise();
-		float planeDist = -Vector3::Dot(planeNrml, wsPointOnPlane);
 
-		out_adjacent_planes->push_back(Plane(planeNrml, planeDist));
+		// First, form a plane around the reference face
+		{
+			//We use the negated normal here for the plane, as we want to clip geometry left outside the shape not inside it.
+			Vector3 planeNrml = -(normalMatrix * best_face->_normal);	
+			planeNrml.Normalise();
+
+			float planeDist = -Vector3::Dot(planeNrml, wsPointOnPlane);
+			out_adjacent_planes->push_back(Plane(planeNrml, planeDist));
+		}
 		
-
+		// Now we need to loop over all adjacent faces, and form a similar
+		// clip plane around those too.
+		// - The way that the HULL object is constructed means each edge can only
+		//   ever have two adjoining faces. This means we can iterate through all
+		//   edges of the face and then build a plane around the other face that
+		//   also shares that edge.
 		for (int edgeIdx : best_face->edge_ids)
 		{
 			const HullEdge& edge = m_CubeHull.GetEdge(edgeIdx);
@@ -160,9 +191,9 @@ void CuboidCollisionShape::GetIncidentReferencePolygon(
 				{
 					const HullFace& adjFace = m_CubeHull.GetFace(adjFaceIdx);
 
-					planeNrml = -(normalMatrix * adjFace.normal);
+					Vector3 planeNrml = -(normalMatrix * adjFace._normal);
 					planeNrml.Normalise();
-					planeDist = -Vector3::Dot(planeNrml, wsPointOnPlane);
+					float planeDist = -Vector3::Dot(planeNrml, wsPointOnPlane);
 
 					out_adjacent_planes->push_back(Plane(planeNrml, planeDist));
 				}
@@ -174,6 +205,7 @@ void CuboidCollisionShape::GetIncidentReferencePolygon(
 
 void CuboidCollisionShape::DebugDraw(const PhysicsObject* currentObject) const
 {
+	// Just draw the cuboid hull-mesh at the position of our PhysicsObject
 	Matrix4 transform = currentObject->GetWorldSpaceTransform() * Matrix4::Scale(m_CuboidHalfDimensions);
 	m_CubeHull.DebugDraw(transform);
 }
@@ -191,7 +223,7 @@ void CuboidCollisionShape::ConstructCubeHull()
 	m_CubeHull.AddVertex(Vector3( 1.0f,  1.0f,  1.0f));		// 6
 	m_CubeHull.AddVertex(Vector3( 1.0f, -1.0f,  1.0f));		// 7
 
-
+	//Indices ( MUST be provided in ccw winding order )
 	int face1[] = { 0, 1, 2, 3 };
 	int face2[] = { 7, 6, 5, 4 };
 	int face3[] = { 5, 6, 2, 1 };
