@@ -1,37 +1,23 @@
 /******************************************************************************
 Class: PhysicsEngine
 Implements:
-Author: Pieran Marris      <p.marris@newcastle.ac.uk> and YOU!
+Author: Rich Davison <richard.davison4@newcastle.ac.uk> and YOU!
 Description:
+A very simple physics engine class, within which to implement the
+material introduced in the Game Technologies module. This is just a rough
+skeleton of how the material could be integrated into the existing codebase -
+it is still entirely up to you how the specifics should work. Now C++ and
+graphics are out of the way, you should be starting to get a feel for class
+structures, and how to communicate data between systems.
 
-The glue that brings all our physics dreams together. This class is provided
-pretty much as is, as most of the sub-systems are tied in to this already
-with a bit of debugging code to visualise various parts of the physics engine.
-
-If you want
-
-The general runtime consists of:
-	- Update(float dt)
-	  - UpdatePhysics()
-	     - Broadphase Collision Detection
-		   Quickly identifies possible collisions in between objects, hopefully
-		   with world space partitioning systems like Octrees.. but currently just
-		   builds a list colliding all objects with all other objects. (Hopefully you
-		   can find some free time to fix this =] )
-
-		 - Narrowphase Collision Detection
-		   Takes the list provided by the broadphase collision detection and 
-		   accurately collides all objects, building a collision manifold as
-		   required. (Tutorial 4/5)
-
-		 - Solve Constraints & Collisions
-		   Solves all velocity constraints in the physics system, these include
-		   both Collision Constraints (Tutorial 5,6) and misc world constraints
-		   (Tutorial 3)
-
-		 - Update Physics Objects
-		   Moves all physics objects through time, updating positions/rotations
-		   etc. (Tutorial 2)
+It is worth poinitng out that the PhysicsEngine is constructed and destructed
+manually using static functions. Why? Well, we probably only want a single
+physics system to control the entire state of our game world, so why allow
+multiple systems to be made? So instead, the constructor / destructor are
+hidden, and we 'get' a single instance of a physics system with a getter.
+This is known as a 'singleton' design pattern, and some developers don't like
+it - but for systems that it doesn't really make sense to have multiples of,
+it is fine!
 
 		(\_/)
 		( '_')
@@ -52,21 +38,21 @@ The general runtime consists of:
 
 #define SOLVER_ITERATIONS 50
 
-#ifndef FALSE
-	#define FALSE	0
-	#define TRUE	1
-#endif
 
-#define DEBUGDRAW_FLAGS_CONSTRAINT				0x1
-#define DEBUGDRAW_FLAGS_MANIFOLD				0x2
-#define DEBUGDRAW_FLAGS_COLLISIONVOLUMES		0x4
-#define DEBUGDRAW_FLAGS_COLLISIONNORMALS		0x8
+#define FALSE	0
+#define TRUE	1
+
+
+#define DEBUHDRAW_FLAGS_CONSTRAINT				0x1
+#define DEBUHDRAW_FLAGS_MANIFOLD				0x2
+#define DEBUHDRAW_FLAGS_COLLISIONVOLUMES		0x4
+#define DEBUHDRAW_FLAGS_COLLISIONNORMALS		0x8
 
 
 struct CollisionPair	//Forms the output of the broadphase collision detection
 {
-	PhysicsObject* pObjectA;
-	PhysicsObject* pObjectB;
+	PhysicsObject* objectA;
+	PhysicsObject* objectB;
 };
 
 class PhysicsEngine : public TSingleton<PhysicsEngine>
@@ -82,7 +68,7 @@ public:
 	void RemoveAllPhysicsObjects(); //Delete all physics entities etc and reset-physics environment for new scene to be initialized
 
 	//Add Constraints
-	void AddConstraint(Constraint* c) { m_vpConstraints.push_back(c); }
+	void AddConstraint(Constraint* c) { m_Constraints.push_back(c); }
 	
 
 	//Update Physics Engine
@@ -123,11 +109,15 @@ protected:
 
 	//Handles narrowphase collision detection
 	void NarrowPhaseCollisions();
+	void NarrowPhaseCollisionsBatch(size_t batch_start, size_t batch_end); //<--- The worker function for multithreading
 
-	//Updates all physics objects position, orientation, velocity etc - Tutorial 2
-	void UpdatePhysicsObject(PhysicsObject* obj);
+
+	//Updates all physics objects position, orientation, velocity etc (default method uses symplectic euler integration)
+	void UpdatePhysicsObjects();	
+	void UpdatePhysicsObjectsBatch(size_t batch_start, size_t batch_end);  //<--- The worker function for multithreading
+	void UpdatePhysicsObject(PhysicsObject* obj);						   //<--- The actual code to update the given physics object
 	
-	//Solves all physical constraints (constraints and manifolds)
+	//Solves all engine constraints (constraints and manifolds)
 	void SolveConstraints();
 
 protected:
@@ -143,6 +133,6 @@ protected:
 
 	std::vector<PhysicsObject*> m_PhysicsObjects;
 
-	std::vector<Constraint*>	m_vpConstraints;		// Misc constraints applying to one or more physics objects
-	std::vector<Manifold*>		m_vpManifolds;			// Contact constraints between pairs of objects
+	std::vector<Constraint*>	m_Constraints;			// Misc constraints between pairs of object
+	std::vector<Manifold*>		m_Manifolds;			// Contact constraints between pairs of objects
 };

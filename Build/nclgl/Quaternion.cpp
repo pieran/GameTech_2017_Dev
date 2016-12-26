@@ -191,43 +191,45 @@ Quaternion Quaternion::FromMatrix(const Matrix4 &m)	{
 	return q;
 }
 
-Quaternion Quaternion::Interpolate(const Quaternion& start, const Quaternion& end, float factor)
+Quaternion Quaternion::Interpolate(const Quaternion& pStart, const Quaternion& pEnd, float pFactor)
 {
-	//Clamp interpolation between start and end
-	factor = min(max(factor, 0.0f), 1.0f);
+	// calc cosine theta
+	float cosom = pStart.x * pEnd.x + pStart.y * pEnd.y + pStart.z * pEnd.z + pStart.w * pEnd.w;
 
-	// Calc cos theta (Dot product)
-	float cos_theta = Quaternion::Dot(start, end);
-
-	// Quaternions can describe any rotation positively or negatively, however to interpolate
-	// correctly we need /both/ quaternions to use the same coordinate system
-	Quaternion real_end = end;
-	if (cos_theta < 0.0f)
+	// adjust signs (if necessary)
+	Quaternion end = pEnd;
+	if (cosom < 0.0f)
 	{
-		cos_theta = -cos_theta;
-		real_end.x = -end.x;
-		real_end.y = -end.y;
-		real_end.z = -end.z;
-		real_end.w = -end.w;
+		cosom = -cosom;
+		end.x = -end.x;   // Reverse all signs
+		end.y = -end.y;
+		end.z = -end.z;
+		end.w = -end.w;
 	}
 
-	// Calculate interpolation coefficients
-	float theta = acosf(cos_theta);			// extract theta from dot product's cos(theta)
-	float inv_sin_theta = sinf(theta);		// compute inverse rotation length 1.0f / sin(theta)
+	// Calculate coefficients
+	float sclp, sclq;
+	if ((1.0f - cosom) > 0.0001f) // 0.0001 -> some epsillon
+	{
+		// Standard case (slerp)
+		float omega, sinom;
+		omega = acos(cosom); // extract theta from dot product's cos theta
+		sinom = sin(omega);
+		sclp = sin((1.0f - pFactor) * omega) / sinom;
+		sclq = sin(pFactor * omega) / sinom;
+	}
+	else
+	{
+		// Very close, do linear interp (because it's faster)
+		sclp = 1.0f - pFactor;
+		sclq = pFactor;
+	}
 
-	if (fabs(inv_sin_theta) < 1e-6f) inv_sin_theta = 1e-6f;
-	inv_sin_theta = 1.0f / inv_sin_theta;
-
-	float factor_a = sinf((1.0f - factor) * theta) * inv_sin_theta;
-	float factor_b = sinf(factor * theta) * inv_sin_theta;
-
-
-	// Interpolate the two quaternions
 	Quaternion out;
-	out.x = factor_a * start.x + factor_b * real_end.x;
-	out.y = factor_a * start.y + factor_b * real_end.y;
-	out.z = factor_a * start.z + factor_b * real_end.z;
-	out.w = factor_a * start.w + factor_b * real_end.w;
+	out.x = sclp * pStart.x + sclq * end.x;
+	out.y = sclp * pStart.y + sclq * end.y;
+	out.z = sclp * pStart.z + sclq * end.z;
+	out.w = sclp * pStart.w + sclq * end.w;
 
 	return out;
 }

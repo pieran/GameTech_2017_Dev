@@ -3,17 +3,14 @@
 #include <sstream>
 
 Vector3	NCLDebug::m_CameraPosition;
-Matrix4	NCLDebug::m_ProjMtx;
-Matrix4	NCLDebug::m_ViewMtx;
-Matrix4	NCLDebug::m_ProjViewMtx;
+Matrix4	NCLDebug::m_ProjView;
 
 int NCLDebug::m_NumStatusEntries = 0;
-float NCLDebug::m_MaxStatusEntryWidth = 0.0f;
-std::vector<LogEntry> NCLDebug::m_vLogEntries;
+std::vector<LogEntry> NCLDebug::m_LogEntries;
 int NCLDebug::m_LogEntriesOffset = 0;
 size_t	NCLDebug::m_OffsetChars  = 0;
 
-std::vector<Vector4> NCLDebug::m_vChars;
+std::vector<Vector4> NCLDebug::m_Characters;
 NCLDebug::DebugDrawList NCLDebug::m_DrawList;
 NCLDebug::DebugDrawList NCLDebug::m_DrawListNDT;
 
@@ -32,8 +29,8 @@ GLuint NCLDebug::m_glFontTex = NULL;
 void NCLDebug::GenDrawPoint(bool ndt, const Vector3& pos, float point_radius, const Vector4& colour)
 {
 	auto list = ndt ? &m_DrawListNDT : &m_DrawList;
-	list->_vPoints.push_back(Vector4(pos.x, pos.y, pos.z, point_radius));
-	list->_vPoints.push_back(colour);
+	list->points.push_back(Vector4(pos.x, pos.y, pos.z, point_radius));
+	list->points.push_back(colour);
 }
 
 void NCLDebug::DrawPoint(const Vector3& pos, float point_radius, const Vector3& colour)
@@ -65,11 +62,11 @@ void NCLDebug::GenDrawThickLine(bool ndt, const Vector3& start, const Vector3& e
 	float camDist = Vector3::Dot(midPoint - m_CameraPosition, midPoint - m_CameraPosition);
 
 	//Add to Data Structures
-	list->_vThickLines.push_back(Vector4(start.x, start.y, start.z, line_width));
-	list->_vThickLines.push_back(colour);
+	list->thickLines.push_back(Vector4(start.x, start.y, start.z, line_width));
+	list->thickLines.push_back(colour);
 
-	list->_vThickLines.push_back(Vector4(end.x, end.y, end.z, camDist));
-	list->_vThickLines.push_back(colour);
+	list->thickLines.push_back(Vector4(end.x, end.y, end.z, camDist));
+	list->thickLines.push_back(colour);
 
 	GenDrawPoint(ndt, start, line_width * 0.5f, colour);
 	GenDrawPoint(ndt, end, line_width * 0.5f, colour);
@@ -96,11 +93,11 @@ void NCLDebug::DrawThickLineNDT(const Vector3& start, const Vector3& end, float 
 void NCLDebug::GenDrawHairLine(bool ndt, const Vector3& start, const Vector3& end, const Vector4& colour)
 {
 	auto list = ndt ? &m_DrawListNDT : &m_DrawList;
-	list->_vHairLines.push_back(Vector4(start.x, start.y, start.z, 1.0f));
-	list->_vHairLines.push_back(colour);
+	list->hairLines.push_back(Vector4(start.x, start.y, start.z, 1.0f));
+	list->hairLines.push_back(colour);
 
-	list->_vHairLines.push_back(Vector4(end.x, end.y, end.z, 1.0f));
-	list->_vHairLines.push_back(colour);
+	list->hairLines.push_back(Vector4(end.x, end.y, end.z, 1.0f));
+	list->hairLines.push_back(colour);
 }
 void NCLDebug::DrawHairLine(const Vector3& start, const Vector3& end, const Vector3& colour)
 {
@@ -160,16 +157,15 @@ void NCLDebug::GenDrawTriangle(bool ndt, const Vector3& v0, const Vector3& v1, c
 	float camDist = Vector3::Dot(midPoint - m_CameraPosition, midPoint - m_CameraPosition);
 
 	//Add to data structures
-	list->_vTris.push_back(Vector4(v0.x, v0.y, v0.z, camDist));
-	list->_vTris.push_back(colour);
+	list->tris.push_back(Vector4(v0.x, v0.y, v0.z, camDist));
+	list->tris.push_back(colour);
 
-	list->_vTris.push_back(Vector4(v1.x, v1.y, v1.z, 1.0f));
-	list->_vTris.push_back(colour);
+	list->tris.push_back(Vector4(v1.x, v1.y, v1.z, 1.0f));
+	list->tris.push_back(colour);
 
-	list->_vTris.push_back(Vector4(v2.x, v2.y, v2.z, 1.0f));
-	list->_vTris.push_back(colour);
+	list->tris.push_back(Vector4(v2.x, v2.y, v2.z, 1.0f));
+	list->tris.push_back(colour);
 }
-
 void NCLDebug::DrawTriangle(const Vector3& v0, const Vector3& v1, const Vector3& v2, const Vector4& colour)
 {
 	GenDrawTriangle(false, v0, v1, v2, colour);
@@ -230,10 +226,10 @@ void NCLDebug::DrawTextCs(const Vector4& cs_pos, const float font_size, const st
 		Vector4 char_pos = Vector4(cs_pos.x + x_offset, cs_pos.y, cs_pos.z, cs_pos.w);
 		Vector4 char_data = Vector4(cs_size.x, cs_size.y, (float)(text[i]), 0.0f);
 
-		m_vChars.push_back(char_pos);
-		m_vChars.push_back(char_data);
-		m_vChars.push_back(colour);
-		m_vChars.push_back(colour);	//We dont really need this, but we need the padding to match the same vertex format as all the other debug drawables
+		m_Characters.push_back(char_pos);
+		m_Characters.push_back(char_data);
+		m_Characters.push_back(colour);
+		m_Characters.push_back(colour);	//We dont really need this, but we need the padding to match the same vertex data format as all the other debug drawables
 
 		x_offset += cs_size.x * 1.2f;
 	}
@@ -254,7 +250,7 @@ void NCLDebug::DrawTextWs(const Vector3& pos, const float font_size, const TextA
 
 	std::string formatted_text = std::string(buf, (size_t)length);
 
-	Vector4 cs_pos = m_ProjViewMtx * Vector4(pos.x, pos.y, pos.z, 1.0f);
+	Vector4 cs_pos = m_ProjView * Vector4(pos.x, pos.y, pos.z, 1.0f);
 	DrawTextCs(cs_pos, font_size, formatted_text, alignment, colour);
 }
 
@@ -271,7 +267,7 @@ void NCLDebug::DrawTextWsNDT(const Vector3& pos, const float font_size, const Te
 
 	std::string formatted_text = std::string(buf, (size_t)length);
 
-	Vector4 cs_pos = m_ProjViewMtx * Vector4(pos.x, pos.y, pos.z, 1.0f);
+	Vector4 cs_pos = m_ProjView * Vector4(pos.x, pos.y, pos.z, 1.0f);
 	cs_pos.z = 1.0f * cs_pos.w;
 	DrawTextCs(cs_pos, font_size, formatted_text, alignment, colour);
 }
@@ -296,7 +292,6 @@ void NCLDebug::AddStatusEntry(const Vector4& colour, const std::string text, ...
 
 	DrawTextCs(Vector4(-1.0f + cs_size_x * 0.5f, 1.0f - (m_NumStatusEntries * cs_size_y) - cs_size_y, -1.0f, 1.0f), STATUS_TEXT_SIZE, formatted_text, TEXTALIGN_LEFT, colour);
 	m_NumStatusEntries++;
-	m_MaxStatusEntryWidth = max(m_MaxStatusEntryWidth, cs_size_x * 0.6f * length);
 }
 
 
@@ -314,17 +309,16 @@ void NCLDebug::AddLogEntry(const Vector3& colour, const std::string& text)
 	le.text = ss.str() + text;
 	le.colour = Vector4(colour.x, colour.y, colour.z, 1.0f);
 
-	if (m_vLogEntries.size() < MAX_LOG_SIZE)
-		m_vLogEntries.push_back(le);
+	if (m_LogEntries.size() < MAX_LOG_SIZE)
+		m_LogEntries.push_back(le);
 	else
 	{
-		m_vLogEntries[m_LogEntriesOffset] = le;
+		m_LogEntries[m_LogEntriesOffset] = le;
 		m_LogEntriesOffset = (m_LogEntriesOffset + 1) % MAX_LOG_SIZE;
 	}
 
 	std::cout << text << endl;
 }
-
 void NCLDebug::Log(const Vector3& colour, const std::string text, ...)
 {
 	va_list args;
@@ -338,24 +332,11 @@ void NCLDebug::Log(const Vector3& colour, const std::string text, ...)
 	AddLogEntry(colour, std::string(buf, (size_t)length));
 }
 
-void NCLDebug::Log(const std::string text, ...)
-{
-	va_list args;
-	va_start(args, text);
-
-	char buf[1024];
-	int needed = vsnprintf_s(buf, 1023, _TRUNCATE, text.c_str(), args);
-	va_end(args);
-
-	int length = (needed < 0) ? 1024 : needed;
-	AddLogEntry(Vector3(0.4f, 1.0f, 0.6f), std::string(buf, (size_t)length));
-}
-
 void NCLDebug::LogE(const char* filename, int linenumber, const std::string text, ...)
 {
 	//Error Format:
 	//<text>
-	//		-> <line number> : <file name> 
+	//		-> <filenumber> : <filename> 
 
 	va_list args;
 	va_start(args, text);
@@ -377,25 +358,24 @@ void NCLDebug::LogE(const char* filename, int linenumber, const std::string text
 
 void NCLDebug::ClearDebugLists()
 {
-	m_vChars.clear();
+	m_Characters.clear();
 
 	auto clear_list = [](NCLDebug::DebugDrawList& list)
 	{
-		list._vPoints.clear();
-		list._vThickLines.clear();
-		list._vHairLines.clear();
-		list._vTris.clear();	
+		list.points.clear();
+		list.thickLines.clear();
+		list.hairLines.clear();
+		list.tris.clear();	
 	};
 	clear_list(m_DrawList);
 	clear_list(m_DrawListNDT);
 
 	m_NumStatusEntries = 0;
-	m_MaxStatusEntryWidth = 0.0f;
 }
 
 void NCLDebug::ClearLog()
 {
-	m_vLogEntries.clear();
+	m_LogEntries.clear();
 	m_LogEntriesOffset = 0;
 }
 
@@ -420,31 +400,13 @@ struct TriVertex
 
 void NCLDebug::SortDebugLists()
 {
-	//Draw log text
-	float cs_size_x = LOG_TEXT_SIZE / Window::GetWindow().GetScreenSize().x * 2.0f;
-	float cs_size_y = LOG_TEXT_SIZE / Window::GetWindow().GetScreenSize().y * 2.0f;
-	size_t log_len = m_vLogEntries.size();
-
-	float max_x = 0.0f;
-	for (size_t i = 0; i < log_len; ++i)
-	{
-		max_x = max(max_x, m_vLogEntries[i].text.length() * cs_size_x * 0.6f);
-
-		size_t idx = (i + m_LogEntriesOffset) % MAX_LOG_SIZE;
-		float alpha = ((m_vLogEntries.size() - i) / (float(MAX_LOG_SIZE)));
-		alpha = 1.0f - (alpha * alpha);
-
-		DrawTextCs(Vector4(-1.0f + cs_size_x * 0.5f, -1.0f + ((log_len - i - 1) * cs_size_y) + cs_size_y, 0.0f, 1.0f), LOG_TEXT_SIZE, m_vLogEntries[idx].text, TEXTALIGN_LEFT, m_vLogEntries[idx].colour);
-	}
-
-
 	auto sort_lists = [](NCLDebug::DebugDrawList& list)
 	{
 		//Sort Points
-		if (!list._vPoints.empty())
+		if (!list.points.empty())
 		{
-			PointVertex* points = reinterpret_cast<PointVertex*>(&list._vPoints[0].x);
-			std::sort(points, points + list._vPoints.size() / 2, [&](const PointVertex& a, const PointVertex& b)
+			PointVertex* points = reinterpret_cast<PointVertex*>(&list.points[0].x);
+			std::sort(points, points + list.points.size() / 2, [&](const PointVertex& a, const PointVertex& b)
 			{
 				float a2 = Vector3::Dot(a.pos.ToVector3() - m_CameraPosition, a.pos.ToVector3() - m_CameraPosition);
 				float b2 = Vector3::Dot(b.pos.ToVector3() - m_CameraPosition, b.pos.ToVector3() - m_CameraPosition);
@@ -453,20 +415,20 @@ void NCLDebug::SortDebugLists()
 		}
 
 		//Sort Lines
-		if (!list._vThickLines.empty())
+		if (!list.thickLines.empty())
 		{
-			LineVertex* lines = reinterpret_cast<LineVertex*>(&list._vThickLines[0].x);
-			std::sort(lines, lines + list._vThickLines.size() / 4, [](const LineVertex& a, const LineVertex& b)
+			LineVertex* lines = reinterpret_cast<LineVertex*>(&list.thickLines[0].x);
+			std::sort(lines, lines + list.thickLines.size() / 4, [](const LineVertex& a, const LineVertex& b)
 			{
 				return (a.p1.pos.w > b.p1.pos.w);
 			});
 		}
 
 		//Sort Triangles
-		if (!list._vTris.empty())
+		if (!list.tris.empty())
 		{
-			TriVertex* tris = reinterpret_cast<TriVertex*>(&list._vTris[0].x);
-			std::sort(tris, tris + list._vTris.size() / 6, [](const TriVertex& a, const TriVertex& b)
+			TriVertex* tris = reinterpret_cast<TriVertex*>(&list.tris[0].x);
+			std::sort(tris, tris + list.tris.size() / 6, [](const TriVertex& a, const TriVertex& b)
 			{
 				return (a.p0.pos.w > b.p0.pos.w);
 			});
@@ -475,72 +437,24 @@ void NCLDebug::SortDebugLists()
 
 	sort_lists(m_DrawList);
 	sort_lists(m_DrawListNDT);
-
-
-
-	//Draw background to text areas
-	// - This is done last as to avoid additional triangle-sorting
-	Matrix4 invProjView = Matrix4::Inverse(m_ProjViewMtx);
-	float rounded_offset_x = 10.f / Window::GetWindow().GetScreenSize().x * 2.0f;
-	float rounded_offset_y = 10.f / Window::GetWindow().GetScreenSize().y * 2.0f;
-	const Vector4 log_background_col(0.1f, 0.1f, 0.1f, 0.5f);
-
-	Vector3 centre;
-	Vector3 last;
-	auto NextTri = [&](const Vector3& point)
-	{
-		DrawTriangleNDT(centre, last, point, log_background_col);
-		DrawHairLineNDT(last, point);
-		last = point;
-	};
-
-	//Draw Log Background
-	if (m_vLogEntries.size() > 0)
-	{
-		float top_y = -1 + m_vLogEntries.size() * cs_size_y + cs_size_y;
-		max_x = max_x - 1 + cs_size_x;
-
-		centre = invProjView * Vector3(-1, -1, 0);
-		last = invProjView * Vector3(max_x, -1, 0);
-		NextTri(invProjView * Vector3(max_x, top_y - rounded_offset_y, 0.0f));
-		for (int i = 0; i < 5; ++i)
-		{
-			Vector3 round_offset = Vector3(
-				cos(DegToRad(i * 22.5f)) * rounded_offset_x,
-				sin(DegToRad(i * 22.5f)) * rounded_offset_y,
-				0.0f);
-			NextTri(invProjView * Vector3(max_x + round_offset.x - rounded_offset_x, top_y + round_offset.y - rounded_offset_y, 0.0f));
-		}
-		NextTri(invProjView * Vector3(-1, top_y, 0.0f));
-	}
-
-	//Draw Status Background
-	if (m_NumStatusEntries > 0)
-	{
-		float cs_size_x = STATUS_TEXT_SIZE / Window::GetWindow().GetScreenSize().x * 2.0f;
-		float cs_size_y = STATUS_TEXT_SIZE / Window::GetWindow().GetScreenSize().y * 2.0f;
-
-		float btm_y = 1 - m_NumStatusEntries * cs_size_y - cs_size_y;
-		max_x = -1 + cs_size_x + m_MaxStatusEntryWidth;
-
-		centre = invProjView * Vector3(-1, 1, 0);
-		last = invProjView * Vector3(-1, btm_y, 0);
-
-		NextTri(invProjView * Vector3(max_x - rounded_offset_x, btm_y, 0.0f));
-		for (int i = 4; i >= 0; --i)
-		{
-			Vector3 round_offset = Vector3(
-				cos(DegToRad(i * 22.5f)) * rounded_offset_x,
-				sin(DegToRad(i * 22.5f)) * rounded_offset_y,
-				0.0f);
-			NextTri(invProjView * Vector3(max_x + round_offset.x - rounded_offset_x, btm_y - round_offset.y + rounded_offset_y, 0.0f));
-		}
-		NextTri(invProjView * Vector3(max_x, 1, 0.0f));
-	}
 }
 
 void NCLDebug::DrawDebugLists()
 {
+	//Draw log text
+	float cs_size_x = LOG_TEXT_SIZE / Window::GetWindow().GetScreenSize().x * 2.0f;
+	float cs_size_y = LOG_TEXT_SIZE / Window::GetWindow().GetScreenSize().y * 2.0f;
+	size_t log_len = m_LogEntries.size();
+	for (size_t i = 0; i < log_len; ++i)
+	{
+		size_t idx = (i + m_LogEntriesOffset) % MAX_LOG_SIZE;
+		float alpha = ((m_LogEntries.size() - i) / (float(MAX_LOG_SIZE)));
+		alpha = 1.0f - (alpha * alpha);
+
+		DrawTextCs(Vector4(-1.0f + cs_size_x * 0.5f, -1.0f + ((log_len - i - 1) * cs_size_y) + cs_size_y, 0.0f, 1.0f), LOG_TEXT_SIZE, m_LogEntries[idx].text, TEXTALIGN_LEFT, m_LogEntries[idx].colour);
+	}
+
+
 	if (!m_glArray)
 	{
 		NCLERROR("Unable to load all ncldebug shaders!");
@@ -549,27 +463,27 @@ void NCLDebug::DrawDebugLists()
 
 	//Buffer all data into the single buffer object
 	size_t max_size = 0;
-	max_size += m_DrawList._vPoints.size() + m_DrawList._vThickLines.size() + m_DrawList._vHairLines.size() + m_DrawList._vTris.size();
-	max_size += m_DrawListNDT._vPoints.size() + m_DrawListNDT._vThickLines.size() + m_DrawListNDT._vHairLines.size() + m_DrawListNDT._vTris.size();
-	max_size += m_vChars.size();
+	max_size += m_DrawList.points.size() + m_DrawList.thickLines.size() + m_DrawList.hairLines.size() + m_DrawList.tris.size();
+	max_size += m_DrawListNDT.points.size() + m_DrawListNDT.thickLines.size() + m_DrawListNDT.hairLines.size() + m_DrawListNDT.tris.size();
+	max_size += m_Characters.size();
 	max_size *= sizeof(Vector4);
 
 
 	size_t buffer_offsets[8];
-	//DT Draw List
+	//Draw List
 	buffer_offsets[0] = 0;
-	buffer_offsets[1] = m_DrawList._vPoints.size();
-	buffer_offsets[2] = buffer_offsets[1] + m_DrawList._vThickLines.size();
-	buffer_offsets[3] = buffer_offsets[2] + m_DrawList._vHairLines.size();
+	buffer_offsets[1] = m_DrawList.points.size();
+	buffer_offsets[2] = buffer_offsets[1] + m_DrawList.thickLines.size();
+	buffer_offsets[3] = buffer_offsets[2] + m_DrawList.hairLines.size();
 
 	//NDT Draw List
-	buffer_offsets[4] = buffer_offsets[3] + m_DrawList._vTris.size();
-	buffer_offsets[5] = buffer_offsets[4] + m_DrawListNDT._vPoints.size();
-	buffer_offsets[6] = buffer_offsets[5] + m_DrawListNDT._vThickLines.size();
-	buffer_offsets[7] = buffer_offsets[6] + m_DrawListNDT._vHairLines.size();
+	buffer_offsets[4] = buffer_offsets[3] + m_DrawList.tris.size();
+	buffer_offsets[5] = buffer_offsets[4] + m_DrawListNDT.points.size();
+	buffer_offsets[6] = buffer_offsets[5] + m_DrawListNDT.thickLines.size();
+	buffer_offsets[7] = buffer_offsets[6] + m_DrawListNDT.hairLines.size();
 
 	//Char Offset 
-	m_OffsetChars     = buffer_offsets[7] + m_DrawListNDT._vTris.size();
+	m_OffsetChars     = buffer_offsets[7] + m_DrawListNDT.tris.size();
 
 
 
@@ -586,14 +500,14 @@ void NCLDebug::DrawDebugLists()
 
 	auto buffer_drawlist = [&](NCLDebug::DebugDrawList& list, size_t* offsets)
 	{
-		if (!list._vPoints.empty()) glBufferSubData(GL_ARRAY_BUFFER, offsets[0] * sizeof(Vector4), list._vPoints.size() * sizeof(Vector4), &list._vPoints[0].x);
-		if (!list._vThickLines.empty()) glBufferSubData(GL_ARRAY_BUFFER, offsets[1] * sizeof(Vector4), list._vThickLines.size() * sizeof(Vector4), &list._vThickLines[0].x);
-		if (!list._vHairLines.empty()) glBufferSubData(GL_ARRAY_BUFFER, offsets[2] * sizeof(Vector4), list._vHairLines.size() * sizeof(Vector4), &list._vHairLines[0].x);
-		if (!list._vTris.empty()) glBufferSubData(GL_ARRAY_BUFFER, offsets[3] * sizeof(Vector4), list._vTris.size() * sizeof(Vector4), &list._vTris[0].x);
+		if (!list.points.empty()) glBufferSubData(GL_ARRAY_BUFFER, offsets[0] * sizeof(Vector4), list.points.size() * sizeof(Vector4), &list.points[0].x);
+		if (!list.thickLines.empty()) glBufferSubData(GL_ARRAY_BUFFER, offsets[1] * sizeof(Vector4), list.thickLines.size() * sizeof(Vector4), &list.thickLines[0].x);
+		if (!list.hairLines.empty()) glBufferSubData(GL_ARRAY_BUFFER, offsets[2] * sizeof(Vector4), list.hairLines.size() * sizeof(Vector4), &list.hairLines[0].x);
+		if (!list.tris.empty()) glBufferSubData(GL_ARRAY_BUFFER, offsets[3] * sizeof(Vector4), list.tris.size() * sizeof(Vector4), &list.tris[0].x);
 	};
 	buffer_drawlist(m_DrawList, &buffer_offsets[0]);
 	buffer_drawlist(m_DrawListNDT, &buffer_offsets[4]);
-	if (!m_vChars.empty()) glBufferSubData(GL_ARRAY_BUFFER, m_OffsetChars * sizeof(Vector4), m_vChars.size() * sizeof(Vector4), &m_vChars[0].x);
+	if (!m_Characters.empty()) glBufferSubData(GL_ARRAY_BUFFER, m_OffsetChars * sizeof(Vector4), m_Characters.size() * sizeof(Vector4), &m_Characters[0].x);
 
 	Vector2 screen_size = Window::GetWindow().GetScreenSize();
 	float aspectRatio = screen_size.y / screen_size.x;
@@ -601,31 +515,31 @@ void NCLDebug::DrawDebugLists()
 
 	auto render_drawlist = [&](NCLDebug::DebugDrawList& list, size_t* offsets)
 	{
-		if (m_pShaderPoints && list._vPoints.size() > 0)
+		if (m_pShaderPoints && list.points.size() > 0)
 		{
 			glUseProgram(m_pShaderPoints->GetProgram());
-			glUniformMatrix4fv(glGetUniformLocation(m_pShaderPoints->GetProgram(), "uProjMtx"), 1, GL_FALSE, &m_ProjMtx.values[0]);
-			glUniformMatrix4fv(glGetUniformLocation(m_pShaderPoints->GetProgram(), "uViewMtx"), 1, GL_FALSE, &m_ViewMtx.values[0]);
+			glUniformMatrix4fv(glGetUniformLocation(m_pShaderPoints->GetProgram(), "projViewMatrix"), 1, GL_FALSE, &m_ProjView.values[0]);
+			glUniform1f(glGetUniformLocation(m_pShaderPoints->GetProgram(), "pix_scalar"), aspectRatio);
 
-			glDrawArrays(GL_POINTS, offsets[0] >> 1, list._vPoints.size() >> 1);
+			glDrawArrays(GL_POINTS, offsets[0] >> 1, list.points.size() >> 1);
 		}
 
-		if (m_pShaderLines && list._vThickLines.size() > 0)
+		if (m_pShaderLines && list.thickLines.size() > 0)
 		{
 			glUseProgram(m_pShaderLines->GetProgram());
-			glUniformMatrix4fv(glGetUniformLocation(m_pShaderLines->GetProgram(), "uProjViewMtx"), 1, GL_FALSE, &m_ProjViewMtx.values[0]);
-			glUniform1f(glGetUniformLocation(m_pShaderLines->GetProgram(), "uAspect"), aspectRatio);
+			glUniformMatrix4fv(glGetUniformLocation(m_pShaderLines->GetProgram(), "projViewMatrix"), 1, GL_FALSE, &m_ProjView.values[0]);
+			glUniform1f(glGetUniformLocation(m_pShaderLines->GetProgram(), "pix_scalar"), aspectRatio);
 
-			glDrawArrays(GL_LINES, offsets[1] >> 1, list._vThickLines.size() >> 1);
+			glDrawArrays(GL_LINES, offsets[1] >> 1, list.thickLines.size() >> 1);
 		}
 
-		if (m_pShaderHairLines && (list._vHairLines.size() + list._vTris.size()) > 0)
+		if (m_pShaderHairLines && (list.hairLines.size() + list.tris.size()) > 0)
 		{
 			glUseProgram(m_pShaderHairLines->GetProgram());
-			glUniformMatrix4fv(glGetUniformLocation(m_pShaderHairLines->GetProgram(), "uProjViewMtx"), 1, GL_FALSE, &m_ProjViewMtx.values[0]);
+			glUniformMatrix4fv(glGetUniformLocation(m_pShaderHairLines->GetProgram(), "projViewMatrix"), 1, GL_FALSE, &m_ProjView.values[0]);
 
-			if (!list._vHairLines.empty()) glDrawArrays(GL_LINES, offsets[2] >> 1, list._vHairLines.size() >> 1);
-			if (!list._vTris.empty()) glDrawArrays(GL_TRIANGLES, offsets[3] >> 1, list._vTris.size() >> 1);
+			if (!list.hairLines.empty()) glDrawArrays(GL_LINES, offsets[2] >> 1, list.hairLines.size() >> 1);
+			if (!list.tris.empty()) glDrawArrays(GL_TRIANGLES, offsets[3] >> 1, list.tris.size() >> 1);
 		}
 	};
 
@@ -636,30 +550,29 @@ void NCLDebug::DrawDebugLists()
 	glEnable(GL_DEPTH_TEST);
 }
 
-//This Function has been abstracted from previous set of draw calls as to avoid supersampling the font bitmap.. which is bad enough as it is.
 void NCLDebug::DrawDebubHUD()
 {
 	//All text data already updated in main DebugDrawLists
 	// - we just need to rebind and draw it
 
-	if (m_pShaderText && m_vChars.size() > 0)
+	if (m_pShaderText && m_Characters.size() > 0)
 	{
 		glBindVertexArray(m_glArray);
 		glUseProgram(m_pShaderText->GetProgram());
-		glUniform1i(glGetUniformLocation(m_pShaderText->GetProgram(), "uFontTex"), 5);
+		glUniform1i(glGetUniformLocation(m_pShaderText->GetProgram(), "fontTex"), 5);
 
 		glActiveTexture(GL_TEXTURE5);
 		glBindTexture(GL_TEXTURE_2D, m_glFontTex);
 
-		glDrawArrays(GL_LINES, m_OffsetChars >> 1, m_vChars.size() >> 1);
+		glDrawArrays(GL_LINES, m_OffsetChars >> 1, m_Characters.size() >> 1);
 	}
 }
 
 void NCLDebug::LoadShaders()
 {
 	m_pShaderPoints = new Shader(
-		SHADERDIR"DebugShaders/PointVertex.glsl",
-		SHADERDIR"DebugShaders/PointFragment.glsl",
+		SHADERDIR"DebugShaders/Vertex.glsl",
+		SHADERDIR"DebugShaders/Fragment.glsl",
 		SHADERDIR"DebugShaders/PointGeometry.glsl");
 	if (!m_pShaderPoints->LinkProgram())
 	{
@@ -698,14 +611,14 @@ void NCLDebug::LoadShaders()
 
 	//Load Font Texture
 	m_glFontTex = SOIL_load_OGL_texture(
-		TEXTUREDIR"font512.png",
+		TEXTUREDIR"font1.png",
 		SOIL_LOAD_AUTO,
-		SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT);
+		SOIL_CREATE_NEW_ID, SOIL_FLAG_INVERT_Y | SOIL_FLAG_COMPRESS_TO_DXT);
 	glBindTexture(GL_TEXTURE_2D, m_glFontTex);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	if (!m_glFontTex)
 	{
 		NCLERROR("NCLDebug could not load font texture");

@@ -1,6 +1,6 @@
 #version 150 core
 
-uniform sampler2D uDiffuseTex;
+uniform sampler2D diffuseTex;
 
 in Vertex	{
 	vec4 worldPos;
@@ -12,8 +12,8 @@ in Vertex	{
 out vec4 OutFrag[2];
 
 void main(void)	{
-	vec3 normal 	= normalize(IN.normal);
-	vec4 texColour  = texture(uDiffuseTex, IN.texCoord);
+	vec3 normal 		= normalize(IN.normal);
+	vec4 texColour  = texture(diffuseTex, IN.texCoord);
 
 //Output Final Fragment Colour
 	OutFrag[0] 	= IN.colour * texColour;

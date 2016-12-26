@@ -1,23 +1,5 @@
-/******************************************************************************
-Class: Matrix3
-Implements:
-Author: Pieran Marris <p.marris@newcastle.ac.uk>
-Description:
-
-A slightly more complete Matrix3 implementation. should provide enough functionality
-for the Game Technologies section of the course. It still by no means fast or
-optimal however, so you should still be thinking about how it could be made better. =]
-
-
-		(\_/)
-		( '_')
-	 /""""""""""""\=========     -----D
-	/"""""""""""""""""""""""\
-....\_@____@____@____@____@_/
-
-*//////////////////////////////////////////////////////////////////////////////
-
-#pragma once
+#ifndef MAT33_H
+#define MAT33_H
 
 #include "Vector3.h"
 
@@ -76,7 +58,6 @@ public:
 
 	//Transformation Matrix
 	static Matrix3 Rotation(float degrees, const Vector3 &axis);
-	static Matrix3 Rotation(const Vector3 &forward_dir, const Vector3& up_dir = Vector3(0, 1, 0));
 	static Matrix3 Scale(const Vector3 &scale);
 
 
@@ -93,6 +74,9 @@ public:
 	// Additional Functionality
 	float Trace() const;
 	float Determinant() const;
+
+
+	void DebugDrawMatrix(const Vector3& position);
 
 
 	//Other representation of data.
@@ -126,3 +110,5 @@ Matrix3 operator*(const Matrix3& a, const float b);
 Matrix3 operator/(const Matrix3& a, const float b);
 
 Vector3 operator*(const Matrix3& a, const Vector3& b);
+
+#endif //MAT33_H

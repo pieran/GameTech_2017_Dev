@@ -11,12 +11,6 @@ as quaternions.
 
 I hate Quaternions.
 
-Pieran Edit: It's not much, though the bug where multiplication was inversed
-             has now been fixed, and I have added another function to linearly
-			 interpolate between two quaternions (slerp) which may come in
-			 handy for networked dead reckoning =]
-
-
 -_-_-_-_-_-_-_,------,   
 _-_-_-_-_-_-_-|   /\_/\   NYANYANYAN
 -_-_-_-_-_-_-~|__( ^ .^) /
@@ -51,7 +45,7 @@ public:
 	Matrix3 ToMatrix3() const;
 
 	Quaternion	Conjugate() const;
-	void		GenerateW();	//builds 4th component when loading in shortened, 3 component quaternions - great for network compression ;)
+	void		GenerateW();	//builds 4th component when loading in shortened, 3 component quaternions
 
 	static Quaternion EulerAnglesToQuaternion(float pitch, float yaw, float roll);
 	static Quaternion AxisAngleToQuaterion(const Vector3& vector, float degrees);

@@ -3,6 +3,7 @@
 layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;
 
+
 out Vertex	{
 	vec2 texCoord;
 } OUT;

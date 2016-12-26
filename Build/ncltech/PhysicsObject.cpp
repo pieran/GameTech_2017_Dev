@@ -12,7 +12,7 @@ PhysicsObject::PhysicsObject()
 	, m_AngularVelocity(0.0f, 0.0f, 0.0f)
 	, m_Torque(0.0f, 0.0f, 0.0f)
 	, m_InvInertia(Matrix3::ZeroMatrix)
-	, m_pColShape(NULL)
+	, m_colShape(NULL)
 	, m_Friction(0.5f)
 	, m_Elasticity(0.9f)
 	, m_OnCollisionCallback(nullptr)
@@ -22,10 +22,10 @@ PhysicsObject::PhysicsObject()
 PhysicsObject::~PhysicsObject()
 {
 	//Delete Collision Shape
-	if (m_pColShape != NULL)
+	if (m_colShape != NULL)
 	{
-		delete m_pColShape;
-		m_pColShape = NULL;
+		delete m_colShape;
+		m_colShape = NULL;
 	}
 }
 

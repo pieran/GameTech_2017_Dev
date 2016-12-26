@@ -11,7 +11,7 @@ rednering.
 All the things you might want to change per-scene are accessible via getters and setters
 such as the camera class, light direction and background colour. Anything with a getter/setter
 is automatically reset to it's default when the scene is switched via the SceneManager, so 
-should be set within the given OnInitializeScene function within your scenes.
+should be set within the given OnInitializeScene function.
 
 
 The renderer has attempted to be made as generic as possible, and should be fairly hands free 
@@ -25,19 +25,6 @@ Not Handled:
 	2. [gfx tut #14] Point Lights (Only single directional light)
 	3. [gfx tut #15] Bump-Mapping 	
 	4. [gfx tut #16] Environment Maps/SkyBoxes
-
-Performance Issue:
-	1. All objects are rendered single file, limiting the maximum throughput of the gfx card to
-	   how fast we can upload uniform matrices and call the draw functions. Other than a complicated
-	   instancing system, a much better and faster solution would be to use glMultiDrawIndirect to
-	   draw an entire RenderList in a single draw call, allowing the gfx card to render objects as fast
-	   as it physically can.
-
-	2. It iterates over every object in the scene and updates them, and iterates through every object in 
-	   the scene to build world tranforms each frame. It would make alot more sense if the objects themselves
-	   registered if they needed updating or not and only update the objects in the scene that require it.
-	   As your games get bigger, the world and the number of stationary objects will also increase so something
-	   like this will save you alot of time.
 
 Extra Features:
 	1. Cascading Shadow Maps
@@ -55,7 +42,7 @@ Extra Features:
 		Anti-Aliasing has a big effect on overall appearance, and if your interested in it's effect I highly suggest
 		putting it on a button-press and swapping between 1x and 8x+ anti-aliasing to see the difference. There are
 		numerous ways of approximating anti-aliasing, and most video games will use a combination of them. The current
-		implementation however uses	super sampling (known as true anti-aliasing), this involves rendering the entire scene
+		implementation however uses	super sampling (or true anti-aliasing), this involves rendering the entire scene
 		at much higher resolution and then downsampling the final image into the final window. This provides the highest
 		quality anti-aliasing of any method, however requires opengl to render the entire scene at x times the
 		resolution and then taking x^2 samples per final fragment - resulting in a /very/ slow and /very/ memory intensive algorithm. 
@@ -121,7 +108,7 @@ public:
 	virtual void UpdateScene(float dt) override; 
 
 	//Get Camera instance
-	inline Camera* GetCamera()									{ return m_pCamera; }
+	inline Camera* GetCamera()									{ return m_Camera; }
 
 	//Get Render Lighting Parameters
 	inline const Vector3& GetBackgroundColor()					{ return m_BackgroundColour; }
@@ -175,20 +162,20 @@ protected:
 
 protected:
 	//Current Scene
-	Scene*				m_pScene;
+	Scene*				m_Scene;
 	
 	//Shaders
-	Shader*				m_pShaderShadow;
-	Shader*				m_pShaderForwardLighting;
-	Shader*				m_pShaderColNorm; 
-	Shader*				m_pShaderLightDir;
-	Shader*				m_pShaderCombineLighting;
-	Shader*				m_pShaderPresentToWindow;
+	Shader*				m_ShaderShadow;
+	Shader*				m_ShaderForwardLighting;
+	Shader*				m_ShaderColNorm; 
+	Shader*				m_ShaderLightDir;
+	Shader*				m_ShaderCombineLighting;
+	Shader*				m_ShaderPresentToWindow;
 
 	//Camera + view frustum/renderlist
-	Camera*				m_pCamera;
+	Camera*				m_Camera;
 	Frustum				m_FrameFrustum;
-	RenderList*			m_pFrameRenderList;
+	RenderList*			m_FrameRenderList;
 
 	//Render FBO
 	GLuint				m_ScreenTexWidth, m_ScreenTexHeight;
@@ -200,10 +187,10 @@ protected:
 	uint				m_ShadowMapSize;
 	bool				m_ShadowMapsInvalidated;
 	GLuint				m_ShadowFBO;
-	GLuint				m_ShadowTex;
+	GLuint				m_ShadowTex[SHADOWMAP_MAX];
 	Matrix4				m_ShadowProj[SHADOWMAP_MAX];
 	Matrix4				m_ShadowProjView[SHADOWMAP_MAX];
-	RenderList*			m_apShadowRenderLists[SHADOWMAP_MAX];
+	RenderList*			m_ShadowRenderLists[SHADOWMAP_MAX];
 
 	//Render Paramaters
 	float				m_GammaCorrection; //Monitor Default: 1.0 / 2.2 (Where 2.2 here is the gamma of the monitor which we need to invert before showing)

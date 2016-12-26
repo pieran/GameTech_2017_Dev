@@ -1,20 +1,19 @@
 /******************************************************************************
 Class: ObjectMesh
 Implements: Object
-Author: Pieran Marris      <p.marris@newcastle.ac.uk> and YOU!
+Author: Pieran Marris <p.marris@newcastle.ac.uk>
 Description: 
 
 Extension to the base Object class to handle managing and rendering a given
 mesh object. For most game objects this will probably be the most common base
 class. By default an object must handle it's own rendering incase it
 needs to render something other than a mesh, or just wants to handle its own
-VAO itself (e.g. the particle renderer from the gfx tutorials).
+VAO itself.
 
 The 'deleteMeshOnCleanup' and 'deleteTexOnCleanup' refer to the memory management.
 If they are set then the relavent components will automatically be cleanup when the
 object is deleted. This can be useful for a hands free approach, though does mean
-care must be taken when multiple objects point to the same mesh/texture that it 
-does not get deleted multiple times.
+care must be taken when multiple objects point to the same mesh/texture.
 
 		(\_/)							
 		( '_')							

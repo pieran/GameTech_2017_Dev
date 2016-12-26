@@ -2,13 +2,13 @@
 #include "PhysicsEngine.h"
 
 Object::Object(const std::string& name)
-	: m_pScene(NULL)
-	, m_pParent(NULL)
+	: m_Scene(NULL)
+	, m_Parent(NULL)
 	, m_Name(name)
 	, m_Colour(1.0f, 1.0f, 1.0f, 1.0f)
 	, m_BoundingRadius(1.0f)
 	, m_FrustumCullFlags(NULL)
-	, m_pPhysicsObject(NULL)
+	, m_PhysicsObject(NULL)
 {
 	m_LocalTransform.ToIdentity();
 	m_WorldTransform.ToIdentity();
@@ -16,22 +16,22 @@ Object::Object(const std::string& name)
 
 Object::~Object()
 {
-	if (m_pPhysicsObject != NULL)
+	if (m_PhysicsObject != NULL)
 	{
-		PhysicsEngine::Instance()->RemovePhysicsObject(m_pPhysicsObject);
-		delete m_pPhysicsObject;
-		m_pPhysicsObject = NULL;
+		PhysicsEngine::Instance()->RemovePhysicsObject(m_PhysicsObject);
+		delete m_PhysicsObject;
+		m_PhysicsObject = NULL;
 	}
 }
 
 
 void Object::CreatePhysicsNode()
 {
-	if (m_pPhysicsObject == NULL)
+	if (m_PhysicsObject == NULL)
 	{
-		m_pPhysicsObject = new PhysicsObject();
-		m_pPhysicsObject->SetAssociatedObject(this);
-		PhysicsEngine::Instance()->AddPhysicsObject(m_pPhysicsObject);
+		m_PhysicsObject = new PhysicsObject();
+		m_PhysicsObject->SetAssociatedObject(this);
+		PhysicsEngine::Instance()->AddPhysicsObject(m_PhysicsObject);
 	}
 }
 
@@ -44,7 +44,7 @@ Object*	Object::FindGameObject(const std::string& name)
 	}
 
 	//Recursively search ALL child objects and return the first one matching the given name
-	for (auto child : m_vpChildren)
+	for (auto child : m_Children)
 	{
 		//Has the object in question got the same name?
 		Object* cObj = child->FindGameObject(name);
@@ -60,7 +60,7 @@ Object*	Object::FindGameObject(const std::string& name)
 
 void Object::AddChildObject(Object* child)
 {
-	m_vpChildren.push_back(child);
-	child->m_pParent = this;
-	child->m_pScene = this->m_pScene;
+	m_Children.push_back(child);
+	child->m_Parent = this;
+	child->m_Scene = this->m_Scene;
 }

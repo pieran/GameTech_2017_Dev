@@ -33,43 +33,43 @@ Object* CommonUtils::BuildSphereObject(
 	bool dragable,
 	const Vector4& color)
 {
-	ObjectMesh* pSphere = dragable
+	ObjectMesh* sphere = dragable
 		? new ObjectMeshDragable(name)
 		: new ObjectMesh(name);
 
-	pSphere->SetMesh(CommonMeshes::Sphere(), false);
-	pSphere->SetTexture(CommonMeshes::CheckerboardTex(), false);
-	pSphere->SetLocalTransform(Matrix4::Scale(Vector3(radius, radius, radius)));
-	pSphere->SetColour(color);
-	pSphere->SetBoundingRadius(radius);
+	sphere->SetMesh(CommonMeshes::Sphere(), false);
+	sphere->SetTexture(CommonMeshes::CheckerboardTex(), false);
+	sphere->SetLocalTransform(Matrix4::Scale(Vector3(radius, radius, radius)));
+	sphere->SetColour(color);
+	sphere->SetBoundingRadius(radius);
 
 	if (!physics_enabled)
 	{
 		//If no physics object is present, just set the local transform (modelMatrix) directly
-		pSphere->SetLocalTransform(Matrix4::Translation(pos) * pSphere->GetLocalTransform());
+		sphere->SetLocalTransform(Matrix4::Translation(pos) * sphere->GetLocalTransform());
 	}
 	else
 	{
 		//Otherwise create a physics object, and set it's position etc
-		pSphere->CreatePhysicsNode();
+		sphere->CreatePhysicsNode();
 
-		pSphere->Physics()->SetPosition(pos);
-		pSphere->Physics()->SetInverseMass(inverse_mass);
+		sphere->Physics()->SetPosition(pos);
+		sphere->Physics()->SetInverseMass(inverse_mass);
 		
 		if (!collidable)
 		{
 			//Even without a collision shape, the inertia matrix for rotation has to be derived from the objects shape
-			pSphere->Physics()->SetInverseInertia(SphereCollisionShape(radius).BuildInverseInertia(inverse_mass));
+			sphere->Physics()->SetInverseInertia(SphereCollisionShape(radius).BuildInverseInertia(inverse_mass));
 		}
 		else
 		{
-			CollisionShape* pColshape = new SphereCollisionShape(radius);
-			pSphere->Physics()->SetCollisionShape(pColshape);
-			pSphere->Physics()->SetInverseInertia(pColshape->BuildInverseInertia(inverse_mass));
+			CollisionShape* colshape = new SphereCollisionShape(radius);
+			sphere->Physics()->SetCollisionShape(colshape);
+			sphere->Physics()->SetInverseInertia(colshape->BuildInverseInertia(inverse_mass));
 		}			
 	}
 
-	return pSphere;
+	return sphere;
 }
 
 Object* CommonUtils::BuildCuboidObject(
@@ -82,40 +82,40 @@ Object* CommonUtils::BuildCuboidObject(
 	bool dragable,
 	const Vector4& color)
 {
-	ObjectMesh* pCuboid = dragable
+	ObjectMesh* cuboid = dragable
 		? new ObjectMeshDragable(name)
 		: new ObjectMesh(name);
 
-	pCuboid->SetMesh(CommonMeshes::Cube(), false);
-	pCuboid->SetTexture(CommonMeshes::CheckerboardTex(), false);
-	pCuboid->SetLocalTransform(Matrix4::Scale(halfdims));
-	pCuboid->SetColour(color);
-	pCuboid->SetBoundingRadius(halfdims.Length());
+	cuboid->SetMesh(CommonMeshes::Cube(), false);
+	cuboid->SetTexture(CommonMeshes::CheckerboardTex(), false);
+	cuboid->SetLocalTransform(Matrix4::Scale(halfdims));
+	cuboid->SetColour(color);
+	cuboid->SetBoundingRadius(halfdims.Length());
 
 	if (!physics_enabled)
 	{
 		//If no physics object is present, just set the local transform (modelMatrix) directly
-		pCuboid->SetLocalTransform(Matrix4::Translation(pos) * pCuboid->GetLocalTransform());
+		cuboid->SetLocalTransform(Matrix4::Translation(pos) * cuboid->GetLocalTransform());
 	}
 	else
 	{
 		//Otherwise create a physics object, and set it's position etc
-		pCuboid->CreatePhysicsNode();
-		pCuboid->Physics()->SetPosition(pos);
-		pCuboid->Physics()->SetInverseMass(inverse_mass);
+		cuboid->CreatePhysicsNode();
+		cuboid->Physics()->SetPosition(pos);
+		cuboid->Physics()->SetInverseMass(inverse_mass);
 
 		if (!collidable)
 		{
 			//Even without a collision shape, the inertia matrix for rotation has to be derived from the objects shape
-			pCuboid->Physics()->SetInverseInertia(CuboidCollisionShape(halfdims).BuildInverseInertia(inverse_mass));
+			cuboid->Physics()->SetInverseInertia(CuboidCollisionShape(halfdims).BuildInverseInertia(inverse_mass));
 		}
 		else
 		{
-			CollisionShape* pColshape = new CuboidCollisionShape(halfdims);
-			pCuboid->Physics()->SetCollisionShape(pColshape);
-			pCuboid->Physics()->SetInverseInertia(pColshape->BuildInverseInertia(inverse_mass));
+			CollisionShape* colshape = new CuboidCollisionShape(halfdims);
+			cuboid->Physics()->SetCollisionShape(colshape);
+			cuboid->Physics()->SetInverseInertia(colshape->BuildInverseInertia(inverse_mass));
 		}
 	}
 
-	return pCuboid;
+	return cuboid;
 }

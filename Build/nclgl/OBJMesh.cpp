@@ -81,9 +81,9 @@ bool	OBJMesh::LoadOBJMesh(std::string filename)	{
 			inputVertices.push_back(vertex);
 		}
 		else if(currentLine == OBJNORM) {	//This line is a Normal!
-			Vector3 _normal;
-			f >> _normal.x; f >> _normal.y; f >> _normal.z;
-			inputNormals.push_back(_normal);
+			Vector3 normal;
+			f >> normal.x; f >> normal.y; f >> normal.z;
+			inputNormals.push_back(normal);
 		}
 		else if(currentLine == OBJTEX) {	//This line is a texture coordinate!
 			Vector2 texCoord;

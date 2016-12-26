@@ -3,21 +3,21 @@
 #include "Scene.h"
 
 ScreenPicker::ScreenPicker()
-	: m_pCurrentlyHeldObject(NULL)
-	, m_pCurrentlyHoverObject(NULL)
+	: m_CurrentlyHeldObject(NULL)
+	, m_CurrentlyHoverObject(NULL)
 	, m_TexWidth(0)
 	, m_TexHeight(0)
 	, m_PickerFBO(NULL)
 	, m_PickerRB(NULL)
 	, m_PickerDepthRB(NULL)
-	, m_pShaderPicker(NULL)
+	, m_ShaderPicker(NULL)
 {
 }
 
 ScreenPicker::~ScreenPicker()
 {
-	m_pCurrentlyHeldObject = NULL;
-	m_pCurrentlyHoverObject = NULL;
+	m_CurrentlyHeldObject = NULL;
+	m_CurrentlyHoverObject = NULL;
 
 	if (m_PickerRB)
 	{
@@ -27,10 +27,10 @@ ScreenPicker::~ScreenPicker()
 		m_PickerRB = NULL;
 	}
 
-	if (m_pShaderPicker)
+	if (m_ShaderPicker)
 	{
-		delete m_pShaderPicker;
-		m_pShaderPicker = NULL;
+		delete m_ShaderPicker;
+		m_ShaderPicker = NULL;
 	}
 }
 
@@ -39,7 +39,7 @@ void ScreenPicker::RegisterObject(Object* obj)
 	if (m_AllRegisteredObjects.size() < MAX_PICKABLE_OBJECTS)
 	{
 		m_AllRegisteredObjects.push_back(obj);
-		obj->GetScreenPickerIdx() = m_AllRegisteredObjects.size();
+		obj->m_ScreenPickerIdx = m_AllRegisteredObjects.size();
 	}
 	else
 	{
@@ -53,7 +53,7 @@ void ScreenPicker::UnregisterObject(Object* obj)
 
 	if (loc != m_AllRegisteredObjects.end())
 	{
-		obj->GetScreenPickerIdx() = 0;
+		obj->m_ScreenPickerIdx = 0;
 		m_AllRegisteredObjects.erase(loc);
 	}
 
@@ -61,22 +61,22 @@ void ScreenPicker::UnregisterObject(Object* obj)
 #pragma omp parallel for
 	for (int i = 0; i < (int)m_AllRegisteredObjects.size(); ++i)
 	{
-		m_AllRegisteredObjects[i]->GetScreenPickerIdx() = i + 1;
+		m_AllRegisteredObjects[i]->m_ScreenPickerIdx = i + 1;
 	}
 }
 
 void ScreenPicker::UpdateFBO(int screen_width, int screen_height)
 {
 	//Have to load the shader here incase the screenpicker constructor is called before we have an OGL context
-	if (m_pShaderPicker == NULL)
+	if (m_ShaderPicker == NULL)
 	{
 #ifdef USE_NSIGHT_HACK
-		m_pShaderPicker = new Shader(SHADERDIR"SceneRenderer/TechVertexShadow.glsl", SHADERDIR"SceneRenderer/TechFragScreenPicker_nsightfix.glsl");
+		m_ShaderPicker = new Shader(SHADERDIR"SceneRenderer/TechVertexSimple.glsl", SHADERDIR"SceneRenderer/TechFragScreenPicker_nsightfix.glsl");
 #else
-		m_pShaderPicker = new Shader(SHADERDIR"SceneRenderer/TechVertexShadow.glsl", SHADERDIR"SceneRenderer/TechFragScreenPicker.glsl");
+		m_ShaderPicker = new Shader(SHADERDIR"SceneRenderer/TechVertexSimple.glsl", SHADERDIR"SceneRenderer/TechFragScreenPicker.glsl");
 #endif
-		glBindFragDataLocation(m_pShaderPicker->GetProgram(), 0, "OutFrag");
-		if (!m_pShaderPicker->LinkProgram())
+		glBindFragDataLocation(m_ShaderPicker->GetProgram(), 0, "OutFrag");
+		if (!m_ShaderPicker->LinkProgram())
 		{
 			NCLERROR("Unable to build ScreenPicker Shader!");
 		}
@@ -117,7 +117,7 @@ void ScreenPicker::UpdateFBO(int screen_width, int screen_height)
 
 bool ScreenPicker::HandleMouseClicks(float dt)
 {
-	if (m_AllRegisteredObjects.size() > 0 && m_TexWidth > 0 && m_TexHeight > 0)
+	if (m_TexWidth > 0 && m_TexHeight > 0)
 	{
 		Vector2 mousepos;
 		bool mouseInWindow = Window::GetWindow().GetMouseScreenPos(&mousepos);
@@ -132,7 +132,7 @@ bool ScreenPicker::HandleMouseClicks(float dt)
 		bool mouseHeld = Window::GetMouse()->ButtonHeld(MOUSE_LEFT);
 
 		//Do we have an object already being dragged?
-		if (m_pCurrentlyHeldObject != NULL)
+		if (m_CurrentlyHeldObject != NULL)
 		{
 			//Is the object still being dragged?
 			if (!mouseDown || !mouseInWindow)
@@ -178,28 +178,28 @@ bool ScreenPicker::HandleMouseClicks(float dt)
 				{
 					if (mouseDown)
 					{
-						m_pCurrentlyHeldObject = target_obj;
-						m_pCurrentlyHeldObject->OnMouseDown(dt, m_OldWorldSpacePos);
+						m_CurrentlyHeldObject = target_obj;
+						m_CurrentlyHeldObject->OnMouseDown(dt, m_OldWorldSpacePos);
 
 						return true;
 					}
 					else
 					{
-						if (target_obj != m_pCurrentlyHoverObject)
+						if (target_obj != m_CurrentlyHoverObject)
 						{
-							if (m_pCurrentlyHoverObject != NULL) m_pCurrentlyHoverObject->OnMouseLeave(dt);
-							m_pCurrentlyHoverObject = target_obj;
-							m_pCurrentlyHoverObject->OnMouseEnter(dt);
+							if (m_CurrentlyHoverObject != NULL) m_CurrentlyHoverObject->OnMouseLeave(dt);
+							m_CurrentlyHoverObject = target_obj;
+							m_CurrentlyHoverObject->OnMouseEnter(dt);
 
 							Window::GetWindow().SetCursorStyle(CURSOR_STYLE_GRAB);
 						}
 					}
 				}
 			}
-			else if (m_pCurrentlyHoverObject != NULL)
+			else if (m_CurrentlyHoverObject != NULL)
 			{
-				m_pCurrentlyHoverObject->OnMouseLeave(dt);
-				m_pCurrentlyHoverObject = NULL;
+				m_CurrentlyHoverObject->OnMouseLeave(dt);
+				m_CurrentlyHoverObject = NULL;
 
 				Window::GetWindow().SetCursorStyle(CURSOR_STYLE_DEFAULT);
 			}
@@ -212,17 +212,17 @@ void ScreenPicker::HandleObjectMouseUp(float dt, bool mouse_in_window, Vector3& 
 {
 	if (!mouse_in_window)
 	{
-		m_pCurrentlyHeldObject->OnMouseUp(dt, m_OldWorldSpacePos);
+		m_CurrentlyHeldObject->OnMouseUp(dt, m_OldWorldSpacePos);
 	}
 	else
 	{
 		clip_space.z = m_OldDepth * 2.0f - 1.0f;
 		Vector3 finalWorldSpacePos = m_invViewProjMtx * clip_space;
 
-		m_pCurrentlyHeldObject->OnMouseUp(dt, finalWorldSpacePos);
+		m_CurrentlyHeldObject->OnMouseUp(dt, finalWorldSpacePos);
 	}
 
-	m_pCurrentlyHeldObject = NULL;
+	m_CurrentlyHeldObject = NULL;
 }
 
 void ScreenPicker::HandleObjectMouseMove(float dt, Vector3& clip_space)
@@ -234,27 +234,26 @@ void ScreenPicker::HandleObjectMouseMove(float dt, Vector3& clip_space)
 	Vector3 worldMovement = newWorldSpacePos - m_OldWorldSpacePos;
 	m_OldWorldSpacePos = newWorldSpacePos;
 
-	m_pCurrentlyHeldObject->OnMouseMove(dt, newWorldSpacePos, worldMovement);
+	m_CurrentlyHeldObject->OnMouseMove(dt, newWorldSpacePos, worldMovement);
 }
 
 
 void ScreenPicker::RenderPickingScene(RenderList* scene_renderlist, const Matrix4& proj_matrix, const Matrix4& view_matrix)
 {
-	Matrix4 projview = proj_matrix * view_matrix;
-	m_invViewProjMtx = Matrix4::Inverse(projview);
+	m_invViewProjMtx = Matrix4::Inverse(proj_matrix * view_matrix);
 
 
 	//Check to see if we even need an updated picking texture?
 	Vector2 mousepos;
-	if (m_pCurrentlyHeldObject != NULL || !Window::GetWindow().GetMouseScreenPos(&mousepos))
+	if (m_CurrentlyHeldObject != NULL || !Window::GetWindow().GetMouseScreenPos(&mousepos))
 	{
 		return;
 	}
 
 	//Setup Shader
-	glUseProgram(m_pShaderPicker->GetProgram());
-	glUniformMatrix4fv(glGetUniformLocation(m_pShaderPicker->GetProgram(), "uProjViewMtx"), 1, GL_FALSE, &projview.values[0]);
-
+	glUseProgram(m_ShaderPicker->GetProgram());
+	glUniformMatrix4fv(glGetUniformLocation(m_ShaderPicker->GetProgram(), "projMatrix"), 1, GL_FALSE, &proj_matrix.values[0]);
+	glUniformMatrix4fv(glGetUniformLocation(m_ShaderPicker->GetProgram(), "viewMatrix"), 1, GL_FALSE, &view_matrix.values[0]);
 	
 
 	//Bind FBO
@@ -267,12 +266,11 @@ void ScreenPicker::RenderPickingScene(RenderList* scene_renderlist, const Matrix
 	glDisable(GL_BLEND);
 
 	//Render Objects
-	GLint uniloc_modelMatrix = glGetUniformLocation(m_pShaderPicker->GetProgram(), "uModelMtx");
-	GLint uniloc_idx = glGetUniformLocation(m_pShaderPicker->GetProgram(), "uObjID");
+	GLint uniloc_modelMatrix = glGetUniformLocation(m_ShaderPicker->GetProgram(), "modelMatrix");
+	GLint uniloc_idx = glGetUniformLocation(m_ShaderPicker->GetProgram(), "objID");
 	auto per_object_render = [&](Object* obj) {
 		glUniformMatrix4fv(uniloc_modelMatrix, 1, false, (float*)&obj->GetWorldTransform());
-		glUniform1ui(uniloc_idx, obj->GetScreenPickerIdx());
-		obj->OnRenderObject();
+		glUniform1ui(uniloc_idx, obj->m_ScreenPickerIdx);
 	};
 	scene_renderlist->RenderOpaqueObjects(per_object_render);
 	scene_renderlist->RenderTransparentObjects(per_object_render);
@@ -284,10 +282,10 @@ void ScreenPicker::ClearAllObjects()
 {
 	m_AllRegisteredObjects.clear();
 
-	if (m_pCurrentlyHoverObject != NULL)
+	if (m_CurrentlyHoverObject != NULL)
 	{
 		Window::GetWindow().SetCursorStyle(CURSOR_STYLE_DEFAULT);
 	}
-	m_pCurrentlyHoverObject = NULL;
-	m_pCurrentlyHeldObject = NULL;
+	m_CurrentlyHoverObject = NULL;
+	m_CurrentlyHeldObject = NULL;
 }

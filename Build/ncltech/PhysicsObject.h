@@ -1,20 +1,14 @@
 /******************************************************************************
 Class: PhysicsObject
 Implements:
-Author: Author: Pieran Marris      <p.marris@newcastle.ac.uk> and YOU!
-Description: 
+Author: Rich Davison	<richard.davison4@newcastle.ac.uk>, Pieran Marris<p.marris@newcastle.ac.uk>
+Description: This class represents the physical properties of your game's
+entities - their position, orientation, mass, collision volume, and so on.
 
-This defines all the physical properties of an element in the world, such
-as velocity, position, mass etc..
-
-
-
-
-
-		(\_/)							
-		( '_')						
-	 /""""""""""""\=========     -----D	
-	/"""""""""""""""""""""""\		
+		(\_/)								-_-_-_-_-_-_-_,------,
+		( '_')								_-_-_-_-_-_-_-|   /\_/\   NYANYANYAN
+	 /""""""""""""\=========     -----D		-_-_-_-_-_-_-~|__( ^ .^) /
+	/"""""""""""""""""""""""\				_-_-_-_-_-_-_-""  ""
 ....\_@____@____@____@____@_/			
 
 *//////////////////////////////////////////////////////////////////////////////
@@ -25,7 +19,9 @@ as velocity, position, mass etc..
 #include <functional>
 
 class PhysicsEngine;
+class PhysicsObject;
 class Object;
+
 
 //Callback function called whenever a collision is detected between two objects
 //Params:
@@ -33,10 +29,9 @@ class Object;
 //	PhysicsObject* colliding_obj	- The object that is colliding with the given object
 //Return:
 //  True	- The physics engine should process the collision as normal
-//	False	- The physics engine should drop the collision pair and not do any further collision resolution/manifold generation
+//	False	- The physics engine should drop the collision pair and not do any further collision resolution
 //			  > This can be useful for AI to see if a player/agent is inside an area/collision volume
-typedef std::function<bool(PhysicsObject* this_obj, PhysicsObject* colliding_obj)> PhysicsCollisionCallback;
-
+typedef std::function<bool(PhysicsObject* this_obj, PhysicsObject* colliding_obj)> FuncCollisionCallback;
 
 
 class PhysicsObject
@@ -65,11 +60,11 @@ public:
 	inline const Vector3&		GetTorque()					const 	{ return m_Torque; }
 	inline const Matrix3&		GetInverseInertia()			const 	{ return m_InvInertia; }
 
-	inline CollisionShape*		GetCollisionShape()			const 	{ return m_pColShape; }
+	inline CollisionShape*		GetCollisionShape()			const 	{ return m_colShape; }
 
-	inline Object*				GetAssociatedObject()		const	{ return m_pParent; }
+	inline Object*				GetAssociatedObject()		const	{ return m_Parent; }
 
-	const Matrix4&				GetWorldSpaceTransform()    const;	//Built from scratch or returned from cached value
+	const Matrix4&				GetWorldSpaceTransform()    const;
 
 
 
@@ -87,23 +82,31 @@ public:
 	inline void SetTorque(const Vector3& v)							{ m_Torque = v; }
 	inline void SetInverseInertia(const Matrix3& v)					{ m_InvInertia = v; }
 
-	inline void SetCollisionShape(CollisionShape* colShape)			{ m_pColShape = colShape; }
+	inline void SetCollisionShape(CollisionShape* colShape)			{ m_colShape = colShape; }
 	
 
 
 	//Called automatically when PhysicsObject is created through Object::CreatePhysicsNode()
-	inline void SetAssociatedObject(Object* obj)					{ m_pParent = obj; }
+	inline void SetAssociatedObject(Object* obj)					{ m_Parent = obj; }
 
 
 	//<---------- CALLBACKS ------------>
-	inline void SetOnCollisionCallback(PhysicsCollisionCallback callback) { m_OnCollisionCallback = callback; }
+	inline void SetOnCollisionCallback(FuncCollisionCallback callback) { m_OnCollisionCallback = callback; }
 	inline bool FireOnCollisionEvent(PhysicsObject* obj_a, PhysicsObject* obj_b)
 	{
 		return (m_OnCollisionCallback) ? m_OnCollisionCallback(obj_a, obj_b) : true;
 	}
 
+
+	//!!!!!!!REMOVE ME!!!!!!!!!!!
+	void* broadphase_ptr = NULL;
+	bool awake = true;
+	float oldVelComb = 0.0f;
+	//!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 protected:
-	Object*				m_pParent;			//Optional: Attached GameObject or NULL if none set
+	Object*				m_Parent;
+
 	bool				m_Enabled;
 
 	mutable bool		m_wsTransformInvalidated;
@@ -125,6 +128,6 @@ protected:
 	Matrix3     m_InvInertia;
 
 	//<----------COLLISION------------>
-	CollisionShape*				m_pColShape;
-	PhysicsCollisionCallback	m_OnCollisionCallback;
+	CollisionShape*			m_colShape;
+	FuncCollisionCallback	m_OnCollisionCallback;
 };

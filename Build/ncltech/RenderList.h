@@ -3,10 +3,9 @@ Class: RenderList
 Implements:
 Author: Pieran Marris <p.marris@newcastle.ac.uk>
 Description:
-
 Render utility to automatically keep track of (and sort) all opaque and transparent objects
 within a given frustum. This is similar to the vector<SceneNode*> used in the Scene Management
-tutorial from Graphics for Games, however instead of being created/deleted each frame it will keep a
+tutorial from Graphics for Games, however instead of being created/deleted each frame keeps a
 persistant list of objects. The Scene searches through all objects and only inserts them if they
 are not already in the list, and deletes them only after they have left the given view frustum.
 
@@ -41,8 +40,8 @@ used to create the renderlist, returning false if all renderlists have already b
 #define MAX_LIST_CHANGE_PER_FRAME 300
 
 //Sort opaque objects front to back to reduce over drawing - tie up between slow sorting or slow rendering, in the current
-//usage the sorting is almost always the bottlekneck and overdraw on the Gfx card is negligible. 
-// - Transparent objects however always need to be sorted in order to correctly blend with background objects.
+//usage the sorting is almost always the bottlekneck. 
+// - Transparent objects however /always/ need to be sorted in order to correctly blend with background objects.
 #define SORT_OPAQUE_LIST FALSE 
 
 
@@ -109,8 +108,8 @@ protected:
 	Vector3 m_CameraPos;
 
 	//Sorted renderlists of visible objects
-	std::vector<RenderList_Object> m_vRenderListOpaque;
-	std::vector<RenderList_Object> m_vRenderListTransparent;
+	std::vector<RenderList_Object> m_RenderListOpaque;
+	std::vector<RenderList_Object> m_RenderListTransparent;
 
 private:
 	//Private Constructor - Allocate through 'AllocateNewRenderList' factory method

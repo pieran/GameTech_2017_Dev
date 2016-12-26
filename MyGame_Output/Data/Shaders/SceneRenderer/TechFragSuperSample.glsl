@@ -1,10 +1,10 @@
 #version 150 core
 
-uniform sampler2D uColourTex;
+uniform sampler2D colourTex;
 
-uniform vec2 	uSinglepixel;
-uniform float   uNumSamples;
-uniform float   uGammaCorrection;
+uniform vec2 	singlepixel;
+uniform float   numsamples;
+uniform float   gammaCorrection;
 
 in Vertex	{
 	vec2 texCoord;
@@ -19,11 +19,11 @@ vec3 supersample(sampler2D target)
 	//Sample every other pixel and interpolate
 	vec3 col = vec3(0.0f);
 	float samples_taken = 0.0f;
-	for (float x = 0.0f; x < uNumSamples; x += 2.0f)
+	for (float x = 0.0f; x < numsamples; x += 2.0f)
 	{
-		for (float y = 0.0f; y < uNumSamples; y += 2.0f)
+		for (float y = 0.0f; y < numsamples; y += 2.0f)
 		{
-			col += texture(target, offtexcoord + uSinglepixel * vec2(x, y)).xyz;
+			col += texture(target, offtexcoord + singlepixel * vec2(x, y)).xyz;
 			samples_taken += 1.0f;
 		}
 	}
@@ -33,8 +33,8 @@ vec3 supersample(sampler2D target)
 
 void main(void)	{
 
-	vec3  colour		= supersample(uColourTex);
-	colour = pow(colour, vec3(uGammaCorrection));
+	vec3  colour		= supersample(colourTex);
+	colour = pow(colour, vec3(gammaCorrection));
 	
 	OutFrag = vec4(colour, 1.0f);
 }

@@ -11,4 +11,4 @@ program side by the filepath "Data/Meshes/mymesh.obj" etc..
 
 This means that to publish your game, you just have to copy the
 '../Build/Release/[mygame].exe" file here and everything will run
-as is without visual studio.
+without visual studio.

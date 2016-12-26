@@ -15,12 +15,16 @@ multiplied by the inverse (projMtx*viewMtx) similar to how deferred rendering co
 texture coordinates back into world space.
 
 !!WARNING!!!
+If you've reached this comment because you are stumbling through the headers trying desperately
+to find out why the engine is so slow and the "Scene Updates" are apparently taking 3ms+ for a
+simple scene and 0ms when clicking an object... THEN LOOK NO FURTHER!
+
 The method of reading pixels back from the graphics card is 'very' slow, as it requires the entire
 rendering pipeline to stall while pixels are read back to the cpu. There is ways this can be optimized
 by doing the reads asynchronously through the use of pixel buffers, however this wont aliaviate the big
 issue. As you progress through the physics module and hopefully implement a broadphase you will find
 doing a ray cast through the broadphase a much faster means of doing mouse-interactivity than screen
-picking and the way all commercial game engines will handle mouse-interactivity.
+picking and the way all game engines handle mouse-interactivity.
 
 
 		(\_/)
@@ -81,8 +85,8 @@ protected:
 	std::vector<Object*> m_AllRegisteredObjects;
 
 	//Current State
-	Object*			m_pCurrentlyHoverObject;
-	Object*			m_pCurrentlyHeldObject;
+	Object*			m_CurrentlyHoverObject;
+	Object*			m_CurrentlyHeldObject;
 
 	//Cached data to allow world-space movement computation
 	float			m_OldDepth;
@@ -94,16 +98,14 @@ protected:
 
 
 	//Shader
-	Shader*			m_pShaderPicker;
+	Shader* m_ShaderPicker;
 
 	//Framebuffer
-	int				m_TexWidth, m_TexHeight;
-	GLuint			m_PickerFBO;
-
-	// We use RenderBuffers instead of 2D Textures as the contents
-	// of the framebuffer never have to be used for anything else.
-	// Also having a 2D-Texture with a pixel format of unsigned int
-	// is not currently supported.
-	GLuint			m_PickerRB; 
-	GLuint			m_PickerDepthRB;
+	int m_TexWidth, m_TexHeight;
+	GLuint m_PickerFBO;
+	//Must use renderbuffer outputing integer colour data to texture is not supported.
+	// This is exactly the same as texture output framebuffer except they are not in themselves valid textures
+	// so can only be read to and from using framebuffer commands like glReadPixels.
+	GLuint m_PickerRB; 
+	GLuint m_PickerDepthRB;
 };

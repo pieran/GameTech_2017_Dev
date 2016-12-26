@@ -47,64 +47,34 @@ public:
 	Scene(const std::string& friendly_name); //Called once at program start - all scene initialization should be done in 'OnInitialize'
 	~Scene();
 
-	// Called when scene is being activated, and will begin being rendered/updated. 
-	//	 - Initialize objects/physics here
-	virtual void OnInitializeScene()	{}		
+	virtual void OnInitializeScene()	{}								//Called when scene is being activated, and will begin being rendered/updated. - initialize objects/physics here
+	virtual void OnCleanupScene()		{ DeleteAllGameObjects(); };	//Called when scene is being swapped and will no longer be rendered/updated - remove objects/physics here
+	virtual void OnUpdateScene(float dt);								//This is msec * 0.001f (e.g time relative to seconds not milliseconds)
 
-	// Called when scene is being swapped and will no longer be rendered/updated 
-	//	 - Remove objects/physics here
-	//	   Note: Default action here automatically delete all game objects
-	virtual void OnCleanupScene()		{ DeleteAllGameObjects(); };	
+	void DeleteAllGameObjects(); //Easiest way of cleaning up the scene - unless you need to save some game objects after scene becomes innactive for some reason.
 
-	// Update Scene Logic
-	//   - Called once per frame and should contain all time-sensitive update logic
-	//	   Note: This is time relative to seconds not milliseconds! (e.g. msec / 1000)
-	virtual void OnUpdateScene(float dt);								
-
-	// Delete all contained Objects
-	//    - This is the default action upon firing OnCleanupScene()
-	void DeleteAllGameObjects(); 
-
-	// Add GameObject to the scene list
-	//    - All added game objects are managed by the scene itself, firing
-	//		OnRender and OnUpdate functions automatically
 	void AddGameObject(Object* game_object);
-
-
-	// Simple recursive search
-	//   - Searches all Objects in the tree and returns the first one with the name specified
-	//     or NULL if none can be found.
 	Object* FindGameObject(const std::string& name);
 
-	// The friendly name associated with this scene instance
 	const std::string& GetSceneName() { return m_SceneName; }
-	
 
-	// The maximum bounds of the contained scene
-	//   - This is exclusively used for shadowing purposes, ensuring all objects that could
-	//     cast shadows are rendered as necessary.
-	void  SetWorldRadius(float radius)	{ m_pRootGameObject->SetBoundingRadius(radius); }
-	float GetWorldRadius()				{ return m_pRootGameObject->GetBoundingRadius(); }
+	//Sets maximum bounds of the scene - for use in shadowing
+	void  SetWorldRadius(float radius)	{ m_RootGameObject->SetBoundingRadius(radius); }
 
 
-	// Adds all visible objects to given RenderList
+	float GetWorldRadius()				{ return m_RootGameObject->GetBoundingRadius(); }
+
+	void BuildWorldMatrices();
 	void InsertToRenderList(RenderList* list, const Frustum& frustum);
 
-	// Updates all world transforms in the Scene Tree
-	void BuildWorldMatrices();
 
 protected:
 
-	// Recursive function called via 'BuildWorldMatrices'
 	void	UpdateWorldMatrices(Object* node, const Matrix4& parentWM);
-
-	// Recusive function called via 'InsertToRenderList'
 	void	InsertToRenderList(Object* node, RenderList* list, const Frustum& frustum);
-
-	// Recusive function called via 'OnUpdateScene'
 	void	UpdateNode(float dt, Object* cNode);
 
 protected:
 	std::string			m_SceneName;
-	Object*				m_pRootGameObject;
+	Object*				m_RootGameObject;
 };

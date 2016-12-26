@@ -22,9 +22,9 @@ void main()
 
 	
 	vec2 charSize = IN[0].colour.xy;
-
+	
 	int text_char = int(IN[0].colour.z) & 0xFF;
-	vec2 texture_offset = vec2(padding / tex_scale * 0.25f, padding / tex_scale * 0.5f) + vec2(float(text_char % 16),  +  float( text_char / 16));	
+	vec2 texture_offset = vec2(float(text_char % 16), 14.92f - float( text_char / 16));	
 	
 	
 	vec4 centrePoint 	= gl_in[0].gl_Position;
@@ -36,18 +36,18 @@ void main()
 
 		
 	gl_Position = a; 
-	OUT.texCoords = (vec2(1.0f - padding, padding) + texture_offset) * tex_scale;
+	OUT.texCoords = (vec2(1.0f - padding, 1.0f - padding) + texture_offset) * tex_scale;
 	EmitVertex();	
 	
 	gl_Position = b; 
-	OUT.texCoords = (vec2(padding, padding) + texture_offset) * tex_scale;
+	OUT.texCoords = (vec2(padding, 1.0f - padding) + texture_offset) * tex_scale;
 	EmitVertex();
 	
 	gl_Position = c; 
-	OUT.texCoords = (vec2(1.0f - padding, 1.0f - padding) + texture_offset) * tex_scale;
+	OUT.texCoords = (vec2(1.0f - padding, padding) + texture_offset) * tex_scale;
 	EmitVertex();
 	
 	gl_Position = d; 
-	OUT.texCoords = (vec2(padding, 1.0f - padding) + texture_offset) * tex_scale;
+	OUT.texCoords = (vec2(padding, padding) + texture_offset) * tex_scale;
 	EmitVertex();
 }  

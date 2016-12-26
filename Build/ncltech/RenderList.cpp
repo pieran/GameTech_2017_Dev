@@ -37,8 +37,9 @@ RenderList::~RenderList()
 
 void RenderList::RenderOpaqueObjects(const std::function<void(Object*)>& per_object_func)
 {
-	for (auto node : m_vRenderListOpaque) {
+	for (auto node : m_RenderListOpaque) {
 		per_object_func(node.target_obj);
+		node.target_obj->OnRenderObject();
 	}
 }
 
@@ -46,8 +47,9 @@ void RenderList::RenderTransparentObjects(const std::function<void(Object*)>& pe
 {
 	if (m_SupportsTransparancy)
 	{
-		for (auto node : m_vRenderListTransparent) {
+		for (auto node : m_RenderListTransparent) {
 			per_object_func(node.target_obj);
+			node.target_obj->OnRenderObject();
 		}
 	}
 }
@@ -67,16 +69,16 @@ void RenderList::UpdateCameraWorldPos(const Vector3& cameraPos)
 #pragma omp parallel for
 		for (int i = 0; i < (int)list.size(); i++)
 		{
-			list[i].cam_dist_sq = (list[i].target_obj->GetWorldTransform().GetPositionVector() - m_CameraPos).LengthSquared() * mul;
+			list[i].cam_dist_sq = (list[i].target_obj->m_WorldTransform.GetPositionVector() - m_CameraPos).LengthSquared() * mul;
 		}
 	};
 
 #if SORT_OPAQUE_LIST
-	update_list(m_vRenderListOpaque, 1.0f);
+	update_list(m_RenderListOpaque, 1.0f);
 #endif
 
 	if (m_SupportsTransparancy)
-		update_list(m_vRenderListTransparent, -1.0f);
+		update_list(m_RenderListTransparent, -1.0f);
 }
 
 void RenderList::SortLists()
@@ -102,11 +104,11 @@ void RenderList::SortLists()
 	};
 
 #if SORT_OPAQUE_LIST
-	sort_list(m_vRenderListOpaque);
+	sort_list(m_RenderListOpaque);
 #endif
 
 	if (m_SupportsTransparancy)
-		sort_list(m_vRenderListTransparent);
+		sort_list(m_RenderListTransparent);
 }
 
 void RenderList::RemoveExcessObjects(const Frustum& frustum)
@@ -121,9 +123,9 @@ void RenderList::RemoveExcessObjects(const Frustum& frustum)
 		{
 			Object* obj = list[i].target_obj;
 
-			if (!frustum.InsideFrustum(obj->GetWorldTransform().GetPositionVector(), obj->GetBoundingRadius()))
+			if (!frustum.InsideFrustum(obj->m_WorldTransform.GetPositionVector(), obj->GetBoundingRadius()))
 			{
-				obj->GetFrustumCullFlags() &= ~m_BitMask;
+				obj->m_FrustumCullFlags &= ~m_BitMask;
 			}
 		}
 
@@ -131,7 +133,7 @@ void RenderList::RemoveExcessObjects(const Frustum& frustum)
 		int n_removed = 0;
 		for (int i = 0; i < size; ++i)
 		{
-			if (! (list[i].target_obj->GetFrustumCullFlags() & m_BitMask) )
+			if (! (list[i].target_obj->m_FrustumCullFlags & m_BitMask) )
 			{
 				n_removed++;
 			}
@@ -146,10 +148,10 @@ void RenderList::RemoveExcessObjects(const Frustum& frustum)
 
 	};
 
-	mark_objects_for_removal(m_vRenderListOpaque);
+	mark_objects_for_removal(m_RenderListOpaque);
 
 	if (m_SupportsTransparancy)
-		mark_objects_for_removal(m_vRenderListTransparent);
+		mark_objects_for_removal(m_RenderListTransparent);
 }
 
 void RenderList::InsertObject(Object* obj)
@@ -167,10 +169,10 @@ void RenderList::InsertObject(Object* obj)
 		return;
 	}
 	m_NumElementsChanged++;
-	obj->GetFrustumCullFlags() |= m_BitMask;
+	obj->m_FrustumCullFlags |= m_BitMask;
 
 
-	auto target_list = &m_vRenderListOpaque;
+	auto target_list = &m_RenderListOpaque;
 
 	RenderList_Object carry_obj;
 	carry_obj.target_obj = obj;
@@ -179,12 +181,12 @@ void RenderList::InsertObject(Object* obj)
 	if (!isOpaque)
 	{
 #endif		
-		carry_obj.cam_dist_sq = (obj->GetWorldTransform().GetPositionVector() - m_CameraPos).LengthSquared();
+		carry_obj.cam_dist_sq = (obj->m_WorldTransform.GetPositionVector() - m_CameraPos).LengthSquared();
 
 		if (!isOpaque)
 		{
 			//If the object is transparent, add it to the transparent render list
-			target_list = &m_vRenderListTransparent;
+			target_list = &m_RenderListTransparent;
 
 			//To cheat the sorting system to always use the same sorting opperand, we just invert all transparent distances so negative far is less than neg near.
 			carry_obj.cam_dist_sq = -carry_obj.cam_dist_sq;
@@ -206,7 +208,7 @@ void RenderList::InsertObject(Object* obj)
 	}
 	else
 	{
-		m_vRenderListOpaque.push_back(carry_obj);
+		m_RenderListOpaque.push_back(carry_obj);
 	}
 #endif
 }
@@ -222,7 +224,7 @@ void RenderList::RemoveObject(Object* obj)
 
 	
 
-	auto target_list = isOpaque ? &m_vRenderListOpaque : &m_vRenderListTransparent;
+	auto target_list = isOpaque ? &m_RenderListOpaque : &m_RenderListTransparent;
 	uint new_size = target_list->size();
 
 	bool found = false;
@@ -262,12 +264,12 @@ void RenderList::RemoveAllObjects()
 		for (int i = 0; i < size; ++i)
 		{
 			Object* obj = list[i].target_obj;
-			obj->GetFrustumCullFlags() &= ~m_BitMask;
+			obj->m_FrustumCullFlags &= ~m_BitMask;
 		}
 	};
-	unmark_objects(m_vRenderListOpaque);
-	m_vRenderListOpaque.clear();
+	unmark_objects(m_RenderListOpaque);
+	m_RenderListOpaque.clear();
 
-	unmark_objects(m_vRenderListTransparent);
-	m_vRenderListTransparent.clear();
+	unmark_objects(m_RenderListTransparent);
+	m_RenderListTransparent.clear();
 }

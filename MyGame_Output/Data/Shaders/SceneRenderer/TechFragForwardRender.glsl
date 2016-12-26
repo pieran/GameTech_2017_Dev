@@ -1,16 +1,16 @@
 #version 150 core
 
-uniform sampler2D uDiffuseTex;
+uniform sampler2D diffuseTex;
 
-uniform vec3  	uInvLightDir;			//Directional Light
-uniform vec3  	uCameraPos;
-uniform float 	uSpecularIntensity;
-uniform vec3  	uAmbientColour;
+uniform vec3  	invLightDir;			//Directional Light
+uniform vec3  	cameraPos;
+uniform float 	specularIntensity;
+uniform vec3  	ambientColour;
 
-uniform int 				 uShadowNum;
-uniform sampler2DArrayShadow uShadowTex;		
-uniform mat4 				 uShadowTransform[16];	//Probably should be a ubo
-uniform vec2 				 uShadowSinglePixel;
+uniform int 			shadowNum;
+uniform sampler2DShadow shadowTex[16];
+uniform mat4 			shadowTransform[16];
+uniform vec2 			shadowSinglePixel = vec2(1.0f / 2048.0f);
 
 in Vertex	{
 	vec4 worldPos;
@@ -21,13 +21,8 @@ in Vertex	{
 
 out vec4 OutFrag;
 
-const float BIAS = 0.01f;
-float shadowTest(vec3 tsShadow, int tsLayer)
+float shadowTest(vec3 tsShadow, float tsShadowW, sampler2DShadow shadowTex, mat4 shadowTransform)
 {	
-	vec4 tCoord;
-	tCoord.xyw = tsShadow;	//I don't know why...
-	tCoord.z = tsLayer;
-
 	/*
 	PCF filtering
 	  - Takes a 4x4 sample around each pixel and averages the result, bluring the edges of shadows
@@ -35,18 +30,18 @@ float shadowTest(vec3 tsShadow, int tsLayer)
 	  - Considering looking into exponential shadow mapping as a nicer looking and faster way to achieve soft shadowing.
 	 */
 	float shadow = 0.0f;
-		
+	
 	for (float y = -1.5f; y <= 1.5f; y += 1.0f)
 		for (float x = -1.5f; x <= 1.5f; x += 1.0f)
-			shadow += texture(uShadowTex, tCoord + vec4(uShadowSinglePixel.x * x, uShadowSinglePixel.y * y, 0, -BIAS));
-		
+			shadow += texture(shadowTex, tsShadow.xyz + vec3(shadowSinglePixel.x * x, shadowSinglePixel.y * y, 0.0f));
+	
 	return shadow / 16.0f;
 }
 
 
 void main(void)	{
 	vec3 normal 		= normalize(IN.normal);
-	vec4 texColour  	= texture(uDiffuseTex, IN.texCoord);
+	vec4 texColour  	= texture(diffuseTex, IN.texCoord);
 	vec4 colour 		= IN.colour * texColour;
 	vec3 wsPos 			= IN.worldPos.xyz / IN.worldPos.w;
 	
@@ -55,18 +50,18 @@ void main(void)	{
 	
 	
 	float shadow = 1.0f;
-	if (uShadowNum > 0)
+	if (shadowNum > 0)
 	{
 		shadow = 0.0f;
-		for (int i = uShadowNum - 1; i >= 0; i--)
+		for (int i = shadowNum - 1; i >= 0; i--)
 		{
-			vec4 hcsShadow = uShadowTransform[i] * shadowWsPos;
+			vec4 hcsShadow = shadowTransform[i] * shadowWsPos;
 			vec3 tsShadow = (hcsShadow.xyz / hcsShadow.w) * 0.5f + 0.5f;
 			
 			if (tsShadow.x >= 0.0f && tsShadow.x <= 1.0f
 				&& tsShadow.y >= 0.0f && tsShadow.y <= 1.0f)
 			{
-				shadow += shadowTest(tsShadow,i);
+				shadow += shadowTest(tsShadow, hcsShadow.w, shadowTex[i], shadowTransform[i]);
 				break;
 			}
 		}
@@ -75,12 +70,12 @@ void main(void)	{
 	}
 	
 //Lighting Calculations
-	vec3 viewDir 		= normalize(uCameraPos - wsPos );
-	vec3 halfDir 		= normalize(uInvLightDir + viewDir);
+	vec3 viewDir 		= normalize(cameraPos - wsPos );
+	vec3 halfDir 		= normalize(invLightDir + viewDir);
 	float rFactor       = max(0.0, dot(halfDir , normal ));
 	
-	float dFactor       = max(0.0, dot(uInvLightDir , normal )) ;
-    float sFactor       = pow(rFactor , uSpecularIntensity );
+	float dFactor       = max(0.0, dot(invLightDir , normal )) ;
+    float sFactor       = pow(rFactor , specularIntensity );
 	   
 //Colour Computations
 	vec3 specColour = min(colour.rgb + vec3(0.5f), vec3(1)); //Quick hack to approximate specular colour of an object, assuming the light colour is white
@@ -89,6 +84,6 @@ void main(void)	{
 	vec3 diffuse = colour.rgb * dFactor * shadow;
 	vec3 specular = specColour * sFactor * shadow;
 	
-	OutFrag.xyz 	= colour.rgb * uAmbientColour + (diffuse + specular * 0.5f) * (vec3(1) - uAmbientColour);
+	OutFrag.xyz 	= colour.rgb * ambientColour + (diffuse + specular * 0.5f) * (vec3(1) - ambientColour);
 	OutFrag.a 		= colour.a;
 }

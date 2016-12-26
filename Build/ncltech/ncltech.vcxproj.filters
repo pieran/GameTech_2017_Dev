@@ -39,17 +39,11 @@
     <Filter Include="src\Objects">
       <UniqueIdentifier>{6e1adfd7-ef55-4355-903b-3c632e0cffcb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\Physics\CollisionDetection">
+      <UniqueIdentifier>{150b318d-e0d2-4b45-8c58-e34eaf789937}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Physics\CollisionDetection">
       <UniqueIdentifier>{4bf454d1-84d0-46d9-8740-b22508034ab4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\Network">
-      <UniqueIdentifier>{1f76c178-4daa-47dc-b245-ec4b846637f7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\Network">
-      <UniqueIdentifier>{41b03480-0701-4b88-b582-a4376299a165}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\Physics\CollisionDetection">
-      <UniqueIdentifier>{d7d3a4ca-1367-4149-850d-54d34230b13c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -89,6 +83,12 @@
     <ClCompile Include="Manifold.cpp">
       <Filter>src\Physics\Constraints</Filter>
     </ClCompile>
+    <ClCompile Include="Constraint.cpp">
+      <Filter>src\Physics\Constraints</Filter>
+    </ClCompile>
+    <ClCompile Include="SphereCollisionShape.cpp">
+      <Filter>src\Physics\CollisionShapes</Filter>
+    </ClCompile>
     <ClCompile Include="CuboidCollisionShape.cpp">
       <Filter>src\Physics\CollisionShapes</Filter>
     </ClCompile>
@@ -103,12 +103,6 @@
     </ClCompile>
     <ClCompile Include="CommonUtils.cpp">
       <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="NetworkBase.cpp">
-      <Filter>src\Network</Filter>
-    </ClCompile>
-    <ClCompile Include="SphereCollisionShape.cpp">
-      <Filter>src\Physics\CollisionShapes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -181,11 +175,8 @@
     <ClInclude Include="CommonUtils.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="NetworkBase.h">
-      <Filter>include\Network</Filter>
-    </ClInclude>
-    <ClInclude Include="CollisionDetectionSAT.h">
-      <Filter>include\Physics\CollisionDetection</Filter>
+    <ClInclude Include="CollisionDetection.h">
+      <Filter>include\Physics</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

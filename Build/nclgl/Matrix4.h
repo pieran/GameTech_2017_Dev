@@ -128,7 +128,7 @@ public:
 			return values[index];
 		}
 
-		//Added for GameTech - Code from taken from GLU library (all rights reserved).
+		//http://stackoverflow.com/questions/1148309/inverting-a-4x4-matrix
 		static Matrix4 Inverse(const Matrix4& rhs) {
 			Matrix4 inv;
 			float det;

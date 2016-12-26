@@ -7,50 +7,50 @@
 Scene::Scene(const std::string& friendly_name)
 	: m_SceneName(friendly_name)
 {	
-	m_pRootGameObject = new Object("rootNode");
-	m_pRootGameObject->m_pScene = this;
-	m_pRootGameObject->SetBoundingRadius(30.0f); //Default scene radius of 40m
+	m_RootGameObject = new Object("rootNode");
+	m_RootGameObject->m_Scene = this;
+	m_RootGameObject->SetBoundingRadius(30.0f); //Default scene radius of 40m
 }
 
 Scene::~Scene()
 {
-	if (m_pRootGameObject)
+	if (m_RootGameObject)
 	{
-		delete m_pRootGameObject;
-		m_pRootGameObject = NULL;
+		delete m_RootGameObject;
+		m_RootGameObject = NULL;
 	}
 }
 
 void Scene::AddGameObject(Object* game_object)
 {
-	m_pRootGameObject->AddChildObject(game_object);
+	m_RootGameObject->AddChildObject(game_object);
 }
 
 Object* Scene::FindGameObject(const std::string& name)
 {
-	return m_pRootGameObject->FindGameObject(name);
+	return m_RootGameObject->FindGameObject(name);
 }
 
 void Scene::DeleteAllGameObjects()
 {
-	if (m_pRootGameObject)
+	if (m_RootGameObject)
 	{
-		for (auto child : m_pRootGameObject->m_vpChildren)
+		for (auto child : m_RootGameObject->m_Children)
 		{
 			delete child;
 		}
-		m_pRootGameObject->m_vpChildren.clear();
+		m_RootGameObject->m_Children.clear();
 	}
 }
 
 void Scene::OnUpdateScene(float dt)
 {
-	UpdateNode(dt, m_pRootGameObject);
+	UpdateNode(dt, m_RootGameObject);
 }
 
 void Scene::BuildWorldMatrices()
 {
-	UpdateWorldMatrices(m_pRootGameObject, Matrix4());
+	UpdateWorldMatrices(m_RootGameObject, Matrix4());
 }
 
 void Scene::UpdateWorldMatrices(Object* cNode, const Matrix4& parentWM)
@@ -67,7 +67,7 @@ void Scene::UpdateWorldMatrices(Object* cNode, const Matrix4& parentWM)
 
 void Scene::InsertToRenderList(RenderList* list, const Frustum& frustum)
 {
-	InsertToRenderList(m_pRootGameObject, list, frustum);
+	InsertToRenderList(m_RootGameObject, list, frustum);
 }
 
 void Scene::InsertToRenderList(Object* node, RenderList* list, const Frustum& frustum)

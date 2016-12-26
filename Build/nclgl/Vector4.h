@@ -19,7 +19,6 @@ public:
 	Vector4(void) {
 		x = y = z = w = 1.0f;
 	}
-
 	Vector4(float x, float y, float z, float w) {
 		this->x = x;
 		this->y = y;

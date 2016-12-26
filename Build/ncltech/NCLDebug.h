@@ -7,13 +7,13 @@ Combination of the debug tools available in OGLRenderer and some of the later gr
 text renderering and particles systems. NCLDebug is designed to be a quick and dirty way of rendering
 simple geometry on-screen anywhere in the program. 
 
-All functions are global, and can be called at any time anywhere in the program. All log entries are
+All functions are global, and can be called at any time any where in the program. All log entries are
 also printed out to the console in case of log messages/errors that occur before the renderer has initiated.
 
 
 Below is a list of functions supported by NCLDebug:
-Note: All functions have an "<function>NDT" varient which refers to a 'non depth-tested' alternative
-	which will always appear in front of any scene geometry.
+	Note: All functions have an "<function>NDT" varient which refers to 'non depth-tested' meaning
+		  they will always renderered be on top of any other world geometry.
 
 	1. DrawPoint
 		Draws a circle on screen with the world-space radius provided
@@ -53,7 +53,7 @@ Note: All functions have an "<function>NDT" varient which refers to a 'non depth
 			  entries have also be fired and pushed it off the stack.
 
 	11. NCLERROR()
-		Utility define to automatically add an error log entry. Using this define is preferable over just calling Log
+		Util define to automatically add an error log entry. Using this define is preferable over just calling Log
 		function as it will include the filename and linenumber it was triggered on with the relevant .cpp file.
 
 
@@ -138,8 +138,8 @@ public:
 
 
 	//Draw Text WorldSpace (pos given here in worldspace)
-	static void DrawTextWs(const Vector3& pos, const float font_size, const TextAlignment alignment, const Vector4 colour, const string text, ...); ///See "printf" for usage manual
-	static void DrawTextWsNDT(const Vector3& pos, const float font_size, const TextAlignment alignment, const Vector4 colour, const string text, ...); ///See "printf" for usage manual
+	static void DrawTextWs(const Vector3& pos, const float font_size, const TextAlignment alignment, const Vector4 colour, const string text, ...); ///See "printf" for usuage manual
+	static void DrawTextWsNDT(const Vector3& pos, const float font_size, const TextAlignment alignment, const Vector4 colour, const string text, ...); ///See "printf" for usuage manual
 
 	//Draw Text (pos is assumed to be pre-multiplied by projMtx * viewMtx at this point)
 	static void DrawTextCs(const Vector4& pos, const float font_size, const string& text, const TextAlignment alignment = TEXTALIGN_LEFT, const Vector4 colour = Vector4(1.0f, 1.0f, 1.0f, 1.0f));
@@ -149,7 +149,6 @@ public:
 
 	//Add a log entry at the bottom left - persistent until scene reset
 	static void Log(const Vector3& colour, const std::string text, ...); ///See "printf" for usuage manual
-	static void Log(const std::string text, ...); //Default Text Colour
 
 	//Add an error using default error formatting - use "NCLERROR("error description", <printf params>) to automatically call this function and fill in the required params
 	static void LogE(const char* filename, int linenumber, const std::string text, ...);
@@ -162,6 +161,10 @@ protected:
 	static void GenDrawThickLine(bool ndt, const Vector3& start, const Vector3& end, float line_width, const Vector4& colour);
 	static void GenDrawHairLine(bool ndt, const Vector3& start, const Vector3& end, const Vector4& colour);
 	static void GenDrawTriangle(bool ndt, const Vector3& v0, const Vector3& v1, const Vector3& v2, const Vector4& colour);
+	static void GenDrawPolygon(bool ndt, int n_verts, const Vector3* verts, const Vector4& colour);
+
+
+
 
 	static void AddLogEntry(const Vector3& colour, const std::string& text);
 
@@ -176,31 +179,27 @@ protected:
 
 	static void ClearLog();
 
-	static void SetDebugDrawData(const Matrix4& projMtx, const Matrix4& viewMtx, const Vector3& camera_pos)
+	static void SetDebugDrawData(const Matrix4& projViewMatrix, const Vector3& camera_pos)
 	{ 
-		m_ProjMtx = projMtx;
-		m_ViewMtx = viewMtx;
-		m_ProjViewMtx = projMtx * viewMtx;
+		m_ProjView = projViewMatrix;
 		m_CameraPosition = camera_pos;
 	}
 
 protected:
 	static Vector3	m_CameraPosition;
-	static Matrix4  m_ProjMtx;
-	static Matrix4  m_ViewMtx;
-	static Matrix4  m_ProjViewMtx;
+	static Matrix4	m_ProjView;
+
 	static int m_NumStatusEntries;
-	static float m_MaxStatusEntryWidth;
-	static std::vector<LogEntry> m_vLogEntries;
+	static std::vector<LogEntry> m_LogEntries;
 	static int m_LogEntriesOffset;
 
-	static std::vector<Vector4> m_vChars;
+	static std::vector<Vector4> m_Characters;
 	struct DebugDrawList
 	{
-		std::vector<Vector4> _vPoints;	
-		std::vector<Vector4> _vThickLines;
-		std::vector<Vector4> _vHairLines;
-		std::vector<Vector4> _vTris;
+		std::vector<Vector4> points;	
+		std::vector<Vector4> thickLines;
+		std::vector<Vector4> hairLines;
+		std::vector<Vector4> tris;
 	};
 	static DebugDrawList m_DrawList;			//Depth-Tested
 	static DebugDrawList m_DrawListNDT;			//Not Depth-Tested
@@ -213,4 +212,6 @@ protected:
 	static GLuint	m_glArray, m_glBuffer;
 	static GLuint	m_glFontTex;
 	static size_t	m_OffsetChars;
+
+	static std::mutex m_DebugMutex;
 };

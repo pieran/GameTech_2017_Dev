@@ -3,10 +3,7 @@
 #include "OGLRenderer.h"
 #include "common.h"
 
-const Matrix3 Matrix3::Identity   = Matrix3(1.0f, 0.0f, 0.0f,
-										    0.0f, 1.0f, 0.0f,
-										    0.0f, 0.0f, 1.0f);
-
+const Matrix3 Matrix3::Identity = Matrix3();
 const Matrix3 Matrix3::ZeroMatrix = Matrix3(0.0f, 0.0f, 0.0f,
 											0.0f, 0.0f, 0.0f,
 											0.0f, 0.0f, 0.0f);
@@ -99,34 +96,6 @@ Matrix3 Matrix3::Rotation(float degrees, const Vector3 &inaxis)
 	return m;
 }
 
- Matrix3 Matrix3::Rotation(const Vector3 &forward_direction, const Vector3& up_direction)
-{
-	Vector3 f = forward_direction;
-	Vector3 u = up_direction;
-
-	f.Normalise();
-	u.Normalise();
-
-	Vector3 x = Vector3::Cross(f, u); x.Normalise();
-	Vector3 y = Vector3::Cross(x, f); y.Normalise();
-
-	Matrix3 m;
-
-	m(0, 0) = x.x;
-	m(1, 0) = x.y;
-	m(2, 0) = x.z;
-
-	m(0, 1) = y.x;
-	m(1, 1) = y.y;
-	m(2, 1) = y.z;
-
-	m(0, 2) = -f.x;
-	m(1, 2) = -f.y;
-	m(2, 2) = -f.z;
-
-	return m;
-}
-
 Matrix3 Matrix3::Scale(const Vector3 &scale)
 {
 	Matrix3 m;
@@ -144,17 +113,15 @@ Matrix3 Matrix3::Inverse(const Matrix3& rhs)
 	if (det != 0.f)
 	{
 		float invdet = 1.0f / det;
-		out(0, 0) =  (rhs(1, 1)*rhs(2, 2) - rhs(2, 1)*rhs(1, 2)) * invdet;
-		out(0, 1) = -(rhs(0, 1)*rhs(2, 2) - rhs(0, 2)*rhs(2, 1)) * invdet;
-		out(0, 2) =  (rhs(0, 1)*rhs(1, 2) - rhs(0, 2)*rhs(1, 1)) * invdet;
-
-		out(1, 0) = -(rhs(1, 0)*rhs(2, 2) - rhs(1, 2)*rhs(2, 0)) * invdet;
-		out(1, 1) =  (rhs(0, 0)*rhs(2, 2) - rhs(0, 2)*rhs(2, 0)) * invdet;
-		out(1, 2) = -(rhs(0, 0)*rhs(1, 2) - rhs(1, 0)*rhs(0, 2)) * invdet;
-
-		out(2, 0) =  (rhs(1, 0)*rhs(2, 1) - rhs(2, 0)*rhs(1, 1)) * invdet;
-		out(2, 1) = -(rhs(0, 0)*rhs(2, 1) - rhs(2, 0)*rhs(0, 1)) * invdet;
-		out(2, 2) =  (rhs(0, 0)*rhs(1, 1) - rhs(1, 0)*rhs(0, 1)) * invdet;
+		out(0, 0) = (rhs(1, 1)*rhs(2, 2) - rhs(2, 1)*rhs(1, 2))*invdet;
+		out(0, 1) = -(rhs(0, 1)*rhs(2, 2) - rhs(0, 2)*rhs(2, 1))*invdet;
+		out(0, 2) = (rhs(0, 1)*rhs(1, 2) - rhs(0, 2)*rhs(1, 1))*invdet;
+		out(1, 0) = -(rhs(1, 0)*rhs(2, 2) - rhs(1, 2)*rhs(2, 0))*invdet;
+		out(1, 1) = (rhs(0, 0)*rhs(2, 2) - rhs(0, 2)*rhs(2, 0))*invdet;
+		out(1, 2) = -(rhs(0, 0)*rhs(1, 2) - rhs(1, 0)*rhs(0, 2))*invdet;
+		out(2, 0) = (rhs(1, 0)*rhs(2, 1) - rhs(2, 0)*rhs(1, 1))*invdet;
+		out(2, 1) = -(rhs(0, 0)*rhs(2, 1) - rhs(2, 0)*rhs(0, 1))*invdet;
+		out(2, 2) = (rhs(0, 0)*rhs(1, 1) - rhs(1, 0)*rhs(0, 1))*invdet;
 	}
 	return out;
 }
@@ -226,9 +193,16 @@ float Matrix3::Trace() const
 
 float Matrix3::Determinant() const
 {
-	return _11*(_22*_33 - _32*_23) - _12*(_21*_33 - _23*_31) + _13*(_21*_32 - _22*_31);
+	return +_11*(_22*_33 - _32*_23) - _12*(_21*_33 - _23*_31) + _13*(_21*_32 - _22*_31);
 }
 
+
+void Matrix3::DebugDrawMatrix(const Vector3& position)
+{
+	OGLRenderer::DrawDebugLine(DEBUGDRAW_PERSPECTIVE, position, position + GetCol(0), Vector3(1.0f, 0.0f, 0.0f), Vector3(1.0f, 0.0f, 0.0f));
+	OGLRenderer::DrawDebugLine(DEBUGDRAW_PERSPECTIVE, position, position + GetCol(1), Vector3(0.0f, 1.0f, 0.0f), Vector3(0.0f, 1.0f, 0.0f));
+	OGLRenderer::DrawDebugLine(DEBUGDRAW_PERSPECTIVE, position, position + GetCol(2), Vector3(0.0f, 0.0f, 1.0f), Vector3(0.0f, 0.0f, 1.0f));
+}
 
 
 Matrix3& operator+=(Matrix3& a, const Matrix3& b)
@@ -341,16 +315,16 @@ Vector3 operator*(const Matrix3& a, const Vector3& b)
 	Vector3 out;
 
 	out.x = a._11 * b.x
-		  + a._21 * b.y
-		  + a._31 * b.z;
+		+ a._21 * b.y
+		+ a._31 * b.z;
 
 	out.y = a._12 * b.x
-		  + a._22 * b.y
-		  + a._32 * b.z;
+		+ a._22 * b.y
+		+ a._32 * b.z;
 
 	out.z = a._13 * b.x
-		  + a._23 * b.y
-		  + a._33 * b.z;
+		+ a._23 * b.y
+		+ a._33 * b.z;
 
 	return out;
 }

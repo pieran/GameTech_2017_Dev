@@ -40,12 +40,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LibraryPath>$(SolutionDir)\$(Configuration);$(SolutionDir)\ExternalLibs\GLEW\lib;$(SolutionDir)\ExternalLibs\SOIL\$(Configuration);$(SolutionDir)\ExternalLibs\ENET;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(SolutionDir);$(SolutionDir)\ExternalLibs\GLEW\include;$(SolutionDir)\ExternalLibs\SOIL;$(SolutionDir)\ExternalLibs\ENET\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\ExternalLibs\GLEW\lib\$(Configuration);$(SolutionDir)\ExternalLibs\SOIL\$(Configuration);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir);$(SolutionDir)\ExternalLibs\GLEW\include;$(SolutionDir)\ExternalLibs\SOIL;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir);$(SolutionDir)\ExternalLibs\GLEW\include;$(SolutionDir)\ExternalLibs\SOIL;$(SolutionDir)\ExternalLibs\ENET\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\$(Configuration);$(SolutionDir)\ExternalLibs\GLEW\lib;$(SolutionDir)\ExternalLibs\SOIL\$(Configuration);$(SolutionDir)\ExternalLibs\ENET;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir);$(SolutionDir)\ExternalLibs\GLEW\include;$(SolutionDir)\ExternalLibs\SOIL;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\ExternalLibs\GLEW\lib\$(Configuration);$(SolutionDir)\ExternalLibs\SOIL\$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -53,7 +53,6 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <OpenMPSupport>true</OpenMPSupport>
-      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -67,7 +66,6 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <OpenMPSupport>true</OpenMPSupport>
-      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -79,8 +77,8 @@
     <ClCompile Include="CollisionDetectionSAT.cpp" />
     <ClCompile Include="CommonMeshes.cpp" />
     <ClCompile Include="CommonUtils.cpp" />
+    <ClCompile Include="Constraint.cpp" />
     <ClCompile Include="CuboidCollisionShape.cpp" />
-    <ClCompile Include="NetworkBase.cpp" />
     <ClCompile Include="ObjectMeshDragable.cpp" />
     <ClCompile Include="NCLDebug.cpp" />
     <ClCompile Include="Object.cpp" />
@@ -98,7 +96,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BoundingBox.h" />
-    <ClInclude Include="CollisionDetectionSAT.h" />
+    <ClInclude Include="CollisionDetection.h" />
     <ClInclude Include="CollisionShape.h" />
     <ClInclude Include="CommonMeshes.h" />
     <ClInclude Include="CommonUtils.h" />
@@ -108,7 +106,6 @@
     <ClInclude Include="Hull.h" />
     <ClInclude Include="Manifold.h" />
     <ClInclude Include="NCLDebug.h" />
-    <ClInclude Include="NetworkBase.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="ObjectMesh.h" />
     <ClInclude Include="ObjectMeshDragable.h" />

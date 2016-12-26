@@ -3,7 +3,6 @@ Class: SceneManager
 Implements: SceneRenderer, TSingleton
 Author: Pieran Marris <p.marris@newcastle.ac.uk>
 Description:
-
 Extends the SceneRenderer to provide means to have multiple enqueued Scenes that
 can be switched between easily. Scenes can be enqueued at the start of the program
 by calling SceneManager::Instance()->EnqueueScene(new <MyScene>(<SceneName?>));
@@ -49,13 +48,13 @@ public:
 
 
 	//Get currently active scene (returns NULL if no scenes yet added)
-	inline Scene* GetCurrentScene()			{ return m_pScene; }
+	inline Scene* GetCurrentScene()			{ return m_Scene; }
 
 	//Get currently active scene's index (return 0 if no scenes yet added)
 	inline uint   GetCurrentSceneIndex()	{ return m_SceneIdx; }
 
 	//Get total number of enqueued scenes
-	inline uint   SceneCount()				{ return m_vpAllScenes.size(); }
+	inline uint   SceneCount()				{ return m_AllScenes.size(); }
 
 
 protected:
@@ -64,5 +63,5 @@ protected:
 
 protected:
 	uint				m_SceneIdx;
-	std::vector<Scene*> m_vpAllScenes;
+	std::vector<Scene*> m_AllScenes;
 };

@@ -17,9 +17,9 @@ public:
 	virtual ~PerfTimer() {}
 
 
-	float GetHigh() { return m_PreviousData._max; }
-	float GetLow() { return m_PreviousData._min; }
-	float GetAvg() { return m_PreviousData._sum / float(m_PreviousData._num); }
+	float GetHigh() { return m_PreviousData.maxSample; }
+	float GetLow() { return m_PreviousData.minSample; }
+	float GetAvg() { return m_PreviousData.sumSamples / float(m_PreviousData.nSamples); }
 
 	void SetUpdateInterval(float seconds) { m_UpdateInterval = seconds; }
 
@@ -34,19 +34,19 @@ public:
 	{
 		float elapsed = m_Timer.GetTimedMS();
 
-		if (m_CurrentData._num == 0)
+		if (m_CurrentData.nSamples == 0)
 		{
-			m_CurrentData._max = elapsed;
-			m_CurrentData._min = elapsed;
+			m_CurrentData.maxSample = elapsed;
+			m_CurrentData.minSample = elapsed;
 		}
 		else
 		{
-			m_CurrentData._max = max(m_CurrentData._max, elapsed);
-			m_CurrentData._min = min(m_CurrentData._min, elapsed);
+			m_CurrentData.maxSample = max(m_CurrentData.maxSample, elapsed);
+			m_CurrentData.minSample = min(m_CurrentData.minSample, elapsed);
 		}
 
-		m_CurrentData._num++;
-		m_CurrentData._sum += elapsed;
+		m_CurrentData.nSamples++;
+		m_CurrentData.sumSamples += elapsed;
 	}
 
 	void UpdateRealElapsedTime(float dt)
@@ -73,14 +73,12 @@ protected:
 
 	struct PerfTimer_Data
 	{
-		float	_max;
-		float	_min;
-
-		//Average defined by (_sum / _num)
-		float	_sum;
-		int		_num;
+		float	maxSample;
+		float	minSample;
+		float	sumSamples;
+		int		nSamples;
 	};
 
-	PerfTimer_Data m_PreviousData;	// Front - Last completed measurement, shown for output
-	PerfTimer_Data m_CurrentData;	// Back - Currently Updating
+	PerfTimer_Data m_PreviousData; //Shown for output
+	PerfTimer_Data m_CurrentData; //Still changing
 };

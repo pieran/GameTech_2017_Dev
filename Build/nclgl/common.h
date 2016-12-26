@@ -22,13 +22,13 @@ static const float		PI = 3.14159265358979323846f;
 static const float		PI_OVER_360 = PI / 360.0f;
 
 //Radians to degrees
-static inline float RadToDeg(const float deg)	{
-	return deg * 180.0f / PI;
+static inline double RadToDeg(const double deg)	{
+	return deg * 180.0 / PI;
 };
 
 //Degrees to radians
-static inline float DegToRad(const float rad)	{
-	return rad * PI / 180.0f;
+static inline double DegToRad(const double rad)	{
+	return rad * PI / 180.0;
 };
 
 typedef unsigned int uint;

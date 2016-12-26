@@ -1,8 +1,6 @@
 #include "ObjectMeshDragable.h"
 #include "ScreenPicker.h"
 #include "NCLDebug.h"
-#include "SceneManager.h"
-#include "PhysicsEngine.h"
 
 ObjectMeshDragable::ObjectMeshDragable(const std::string& name)
 	: ObjectMesh(name)
@@ -47,6 +45,7 @@ void ObjectMeshDragable::OnMouseDown(float dt, const Vector3& worldPos)
 	
 	if (this->HasPhysics())
 	{
+		this->Physics()->awake = true;
 		this->Physics()->SetAngularVelocity(Vector3(0.0f, 0.0f, 0.0f));
 		this->Physics()->SetLinearVelocity(Vector3(0.0f, 0.0f, 0.0f));
 	}
@@ -58,14 +57,10 @@ void ObjectMeshDragable::OnMouseMove(float dt, const Vector3& worldPos, const Ve
 
 	if (this->HasPhysics())
 	{
+		this->Physics()->awake = true;
 		this->Physics()->SetPosition(worldPos - m_LocalClickOffset);
 		this->Physics()->SetAngularVelocity(Vector3(0.0f, 0.0f, 0.0f));
 		this->Physics()->SetLinearVelocity(worldChange / dt * 0.5f);
-
-		float x = Window::GetMouse()->GetWheelMovement() * 0.1f / PhysicsEngine::Instance()->GetDeltaTime();
-		Matrix4 viewMtx = SceneManager::Instance()->GetCamera()->BuildViewMatrix();
-		Vector3 forawrd = -Vector3(viewMtx[0], viewMtx[4], viewMtx[8]);
-		this->Physics()->SetAngularVelocity(forawrd * x);
 	}
 	else
 	{
@@ -77,6 +72,7 @@ void ObjectMeshDragable::OnMouseUp(float dt, const Vector3& worldPos)
 {
 	if (this->HasPhysics())
 	{
+		this->Physics()->awake = true;
 		this->Physics()->SetPosition(worldPos - m_LocalClickOffset);
 	}
 	else

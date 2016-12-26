@@ -1,12 +1,12 @@
 /******************************************************************************
 Class: ObjectMeshDragable
 Implements: ObjectMesh
-Author: Pieran Marris      <p.marris@newcastle.ac.uk> and YOU!
+Author: Pieran Marris <p.marris@newcastle.ac.uk>
 Description:
 
-Example variant of ObjectMesh that makes the object in question clickable by the 
-user. This will allow the object to be clicked and dragged around the scene via use of
-the ScreenPicker component. The default behaviour is as follows:
+Extension to ObjectMesh to add preset functionality for mouse interactivity. This
+class will automatically allow the object to be clicked and dragged around the scene
+via use of the ScreenPicker and relevant callbacks. The default behaviour is as follows:
 	1. Mouse Enter [hover]  -> Set to highlight colour
 	2. Mouse Click			-> Set to clicked colour
 	3. Mouse Move			-> Move position (either worldtransform or physics->pos depending if the object has physics enabled)
@@ -14,7 +14,7 @@ the ScreenPicker component. The default behaviour is as follows:
 	5. Mouse Leave			-> Set back to default colour
 
 Probably not the most sophisticated use of mouse interactivity, though if it helps
-debug some physics code at some point then it will have served it's purpose.
+debug some physics code at some point then it will have served it's purpose brilliantly.
 
 TODO: Start using shorter/abbreviated class names
 
@@ -36,11 +36,8 @@ public:
 	ObjectMeshDragable(const std::string& name);
 	virtual ~ObjectMeshDragable();
 
-	//Change in colour when mouse is hovering over the object
-	void SetMouseOverColourOffset(const Vector4& col_offset);	
-
-	//Change in colour when mouse down
-	void SetMouseDownColourOffset(const Vector4& col_offset);	
+	void SetMouseOverColourOffset(const Vector4& col_offset);	//Change in colour when mouse is hovering over the object
+	void SetMouseDownColourOffset(const Vector4& col_offset);	//Change in colour when clicked
 
 protected:
 	virtual void OnMouseEnter(float dt) override;

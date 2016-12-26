@@ -29,8 +29,16 @@ void Camera::HandleMouse(float dt)
 
 void Camera::HandleKeyboard(float dt)
 {
+	float rot_speed = 45.f * dt; //45 degrees per second
 	float speed = 3.5f * dt;	//3.5m per second
 
+
+	if (Window::GetKeyboard()->KeyDown(KEYBOARD_Q)) {
+		yaw += rot_speed;
+	}
+	if (Window::GetKeyboard()->KeyDown(KEYBOARD_E)) {
+		yaw -= rot_speed;
+	}
 
 	//Bounds check the pitch, to be between straight up and straight down ;)
 	if (yaw <0) {
@@ -39,6 +47,7 @@ void Camera::HandleKeyboard(float dt)
 	if (yaw > 360.0f) {
 		yaw -= 360.0f;
 	}
+
 
 
 	if (Window::GetKeyboard()->KeyDown(KEYBOARD_W)) {

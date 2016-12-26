@@ -1,8 +1,6 @@
 #include "Shader.h"
 
 Shader::Shader(string vFile, string fFile, string gFile)	{
-	cout << "Compiling Shader..." << endl;
-
 	program		= glCreateProgram();
 	objects[SHADER_VERTEX]		= GenerateShader(vFile	 ,GL_VERTEX_SHADER);
 	objects[SHADER_FRAGMENT]	= GenerateShader(fFile,GL_FRAGMENT_SHADER);
@@ -31,9 +29,11 @@ bool	Shader::LoadShaderFile(string from, string &into)	{
 	ifstream	file;
 	string		temp;
 
+	cout << "Loading shader text from " << from << endl;
+
 	file.open(from.c_str());
 	if(!file.is_open()){
-		cout << "\t Error: File does not exist!" << endl;
+		cout << "File does not exist!" << endl;
 		return false;
 	}
 
@@ -45,15 +45,16 @@ bool	Shader::LoadShaderFile(string from, string &into)	{
 	//cout << into << endl << endl;
 
 	file.close();
-	//cout << "Loaded shader text!" << endl;
+	cout << "Loaded shader text!" << endl;
 	return true;
 }
 
 GLuint	Shader::GenerateShader(string from, GLenum type)	{
-	cout << "\t-> Compiling Shader: " << from << endl;
+	cout << "Compiling Shader..." << endl;
 
 	string load;
 	if(!LoadShaderFile(from,load)) {
+		cout << "Compiling failed!" << endl;
 		loadFailed = true;
 		return 0;
 	}
@@ -68,15 +69,15 @@ GLuint	Shader::GenerateShader(string from, GLenum type)	{
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
 
 	if (status == GL_FALSE)	{
-		cout << "\t Error: Compiling failed!" << endl;
+		cout << "Compiling failed!" << endl;
 		char error[512];
 		glGetInfoLogARB(shader, sizeof(error), NULL, error);
-		cout << error << endl << endl;
+		cout << error;
 		loadFailed = true;
 		cout << endl;
 		return 0;
 	}
-
+	cout << "Compiling success!" << endl << endl;
 	loadFailed = false;
 	return shader;
 }
@@ -86,22 +87,19 @@ bool Shader::LinkProgram()	{
 		return false;
 	}
 	glLinkProgram(program); 
-	cout << "\t-> Linking Shader: ";
 
 	GLint code;
 	glGetProgramiv(program, GL_LINK_STATUS, &code);
 
 	if (code == GL_FALSE)	{
-		cout << "Failed!" << endl;
+		cout << "Linking failed!" << endl;
 		char error[512];
 		glGetInfoLogARB(program, sizeof(error), NULL, error);
-		cout << error << endl << endl;
+		cout << error;
 		loadFailed = true;
-		return false;
 	}
-	
-	cout << "Success!" << endl << endl;
-	return true;
+
+	return code == GL_TRUE ?  true : false;
 }
 
 void	Shader::SetDefaultAttributes()	{
